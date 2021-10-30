@@ -10,6 +10,7 @@ void initialize_bools(STATUS_BOOLS* bools)
     bools->is_time_up = false;
     bools->restart_level = false;
     bools->player_is_spawning = true;
+    bools->leave_game = false;
     bools->redraw = true;
 
     return;
@@ -67,6 +68,104 @@ void stop_fall(GAME_MAP* map, int x, int y, bool is_boulder, STATUS_BOOLS* bools
             map->map[y][x] = GEM;
     }
     return;
+}
+
+void init_player(GAME_MAP* map, COORDINATES* player)
+{
+    for(int i = 0; i < map->height; i++)
+    {
+        for(int j = 0; j < map->width; j++)
+        {
+            if(map->map[i][j] == PLAYER)
+            {
+                player->y = i;
+                player->x = j;
+            }
+        }
+    }
+}
+
+void init_score(GAME_SCORE* score)
+{
+    score->game_score = 0;
+    score->score_display = 0;
+}
+
+void player_update(GAME_MAP* map, COORDINATES* player, MY_ALLEGRO_STRUCT* my_al_struct, GAME_SCORE* score, STATUS_BOOLS* bools)
+{
+    if(my_al_struct->key[ALLEGRO_KEY_LEFT])
+        check_move(map, player, -1, 0, score, bools);
+    if(my_al_struct->key[ALLEGRO_KEY_LEFT])
+        check_move(map, player, -1, 0, score, bools);
+    if(my_al_struct->key[ALLEGRO_KEY_LEFT])
+        check_move(map, player, -1, 0, score, bools);
+    if(my_al_struct->key[ALLEGRO_KEY_LEFT])
+        check_move(map, player, -1, 0, score, bools);
+}
+
+void check_move(GAME_MAP* map, COORDINATES* player, int x, int y, GAME_SCORE* score, STATUS_BOOLS* bools)
+{
+    if(map->map[player->y + y][player->x + x] == AIR)
+    {
+        update_move(map, player, x, y);
+        return;
+    }
+    if(map->map[player->y + y][player->x + x] == DIRT)
+    {
+        update_move(map, player, x, y);
+        add_score(score, DIRT);
+        return;
+    }
+    if(map->map[player->y + y][player->x + x] == GEM)
+    {
+        update_move(map, player, x, y);
+        add_score(score, GEM);
+        return;
+    }
+    if(map->map[player->y][player->x + x] == BOULDER)
+    {
+        if(check_boulder_push(map, player->y, player->x + x + x))
+        {
+            push_boulder(map, player->y, player->x + x, player->y, player->x + x + x);
+            update_move(map, player, x, y);
+        }
+        return;
+    }
+    if(map->map[player->y][player->x + x] == OPEN_HATCH)
+    {
+        bools->level_win = true;
+        return;
+    }
+    return;
+}
+
+void update_move(GAME_MAP* map, COORDINATES* player, int dest_x, int dest_y)
+{
+    map->map[player->y][player->x] = AIR;
+    map->map[player->y + dest_y][player->x + dest_x] = PLAYER;
+    player->y += dest_y;
+    player->y += dest_x;
+}
+
+bool check_boulder_push(GAME_MAP* map, int dest_x, int dest_y)
+{
+    if(map->map[dest_x][dest_y] == AIR)
+        return true;
+    return false;
+}
+
+void push_boulder(GAME_MAP* map, int ori_x, int ori_y, int dest_x, int dest_y)
+{
+    map->map[ori_y][ori_x] = AIR;
+    map->map[dest_y][dest_x] = BOULDER;
+}
+
+void add_score(GAME_SCORE* score, int flag)
+{
+    if(flag == DIRT)
+        score->game_score += 2;
+    if(flag == GEM)
+        score->game_score += 100;
 }
 
 void kill_player(GAME_MAP* map, int y, int x, STATUS_BOOLS* bools, int death_flag)
