@@ -22,6 +22,7 @@
 
 typedef struct STATUS_BOOLS
 {
+    bool menu_is_open;
     bool player_control;
     bool player_is_spawning;
     bool player_is_dead;
@@ -56,7 +57,7 @@ void update_fall(GAME_MAP* map, int x, int y, bool is_boulder);
 void stop_fall(GAME_MAP* map, int x, int y, bool is_boulder, STATUS_BOOLS* bools);
 void init_player(GAME_MAP* map, COORDINATES* player);
 void init_score(GAME_SCORE* score);
-void player_update(GAME_MAP* map, COORDINATES* player, MY_ALLEGRO_STRUCT* my_al_struct, GAME_SCORE* score, STATUS_BOOLS* bools);
+void player_update(GAME_MAP* map, COORDINATES* player, GAME_SCORE* score, STATUS_BOOLS* bools);
 void check_move(GAME_MAP* map, COORDINATES* player, int x, int y, GAME_SCORE* score, STATUS_BOOLS* bools);
 void update_move(GAME_MAP* map, COORDINATES* player, int dest_x, int dest_y);
 void add_score(GAME_SCORE* score, int flag);

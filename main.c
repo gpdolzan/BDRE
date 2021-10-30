@@ -42,7 +42,7 @@ int main()
     register_queue(&my_al_struct);
 
     sprites_init(&my_al_struct);
-    keyboard_init(&my_al_struct);
+    keyboard_init();
 
     /* End of Allegro5 Initialization */
 
@@ -57,12 +57,19 @@ int main()
             case ALLEGRO_EVENT_TIMER:
                 if(my_al_struct.event.timer.source == my_al_struct.timers.game_tick)
                 {
-                    terrain_update(&game_map, &game_bools);
-                    player_update(&game_map, &player, &my_al_struct, &score, &game_bools);
+                    if(game_bools.menu_is_open == false)
+                    {
+                        terrain_update(&game_map, &game_bools);
+                        if(game_bools.player_is_dead == false)
+                            player_update(&game_map, &player, &score, &game_bools);
+                    }
                 }
 
-                if(my_al_struct.key[ALLEGRO_KEY_ESCAPE])
+                if(key[ALLEGRO_KEY_ESCAPE])
                     game_bools.leave_game = true;
+
+                if(key[ALLEGRO_KEY_F1])
+                    game_bools.menu_is_open = false;
 
                 game_bools.redraw = true;
             break;
@@ -82,7 +89,8 @@ int main()
             display_pre_draw(&my_al_struct);
             al_clear_to_color(al_map_rgb(0,0,0));
 
-            terrain_draw(&game_map, &my_al_struct);
+            if(game_bools.menu_is_open == false)
+                terrain_draw(&game_map, &my_al_struct);
 
             display_post_draw(&my_al_struct);
 

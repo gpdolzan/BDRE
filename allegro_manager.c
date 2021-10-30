@@ -80,9 +80,10 @@ void display_post_draw(MY_ALLEGRO_STRUCT* my_al_struct)
 }
 
 /* Keyboard */
-void keyboard_init(MY_ALLEGRO_STRUCT* my_al_struct)
+void keyboard_init()
 {
-    memset(my_al_struct->key, 0, sizeof(my_al_struct->key));
+    for(int i = 0; i < ALLEGRO_KEY_MAX; i++)
+        key[i] = 0;
 }
 
 void keyboard_update(MY_ALLEGRO_STRUCT* my_al_struct)
@@ -91,14 +92,14 @@ void keyboard_update(MY_ALLEGRO_STRUCT* my_al_struct)
     {
         case ALLEGRO_EVENT_TIMER:
             for(int i = 0; i < ALLEGRO_KEY_MAX; i++)
-                my_al_struct->key[i] &= KEY_SEEN;
+                key[i] &= KEY_SEEN;
             break;
 
         case ALLEGRO_EVENT_KEY_DOWN:
-            my_al_struct->key[my_al_struct->event.keyboard.keycode] = KEY_SEEN | KEY_RELEASED;
+            key[my_al_struct->event.keyboard.keycode] = KEY_SEEN | KEY_RELEASED;
             break;
         case ALLEGRO_EVENT_KEY_UP:
-            my_al_struct->key[my_al_struct->event.keyboard.keycode] &= KEY_RELEASED;
+            key[my_al_struct->event.keyboard.keycode] &= KEY_RELEASED;
             break;
     }
 }

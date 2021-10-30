@@ -23,6 +23,8 @@
 #define KEY_SEEN     1
 #define KEY_RELEASED 2
 
+unsigned char key[ALLEGRO_KEY_MAX];
+
 typedef struct MY_ALLEGRO_SPRITES
 {
     ALLEGRO_BITMAP* stone_brick;
@@ -68,7 +70,6 @@ typedef struct MY_ALLEGRO_STRUCT
     MY_ALLEGRO_TIMERS timers;
     MY_ALLEGRO_SPRITES sprites;
     ALLEGRO_EVENT event;
-    unsigned char key[ALLEGRO_KEY_MAX];
 
 }MY_ALLEGRO_STRUCT;
 
@@ -91,7 +92,7 @@ void display_post_draw(MY_ALLEGRO_STRUCT* my_al_struct);
 void display_clear(MY_ALLEGRO_STRUCT* my_al_struct);
 
 /* Keyboard */
-void keyboard_init(MY_ALLEGRO_STRUCT* my_al_struct);
+void keyboard_init();
 void keyboard_update(MY_ALLEGRO_STRUCT* my_al_struct);
 
 /* Sprites */
