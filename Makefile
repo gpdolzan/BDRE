@@ -18,14 +18,14 @@ boulderdash: $(objects)
 main.o: main.c
 	cc -c main.c $(CFLAGS)
 
-allegro_manager.o: allegro_manager.c
-	cc -c allegro_manager.c $(CFLAGS)
-
 map_reader.o: map_reader.c
 	cc -c map_reader.c $(CFLAGS)
 
 game_manager.o: game_manager.c
 	cc -c game_manager.c $(CFLAGS)
+
+allegro_manager.o: allegro_manager.c
+	cc -c allegro_manager.c $(CFLAGS)
 
 clean:
 	rm -f *.o

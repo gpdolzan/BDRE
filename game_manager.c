@@ -1,4 +1,5 @@
 #include "game_manager.h"
+#include "allegro_manager.h"
 
 void initialize_bools(STATUS_BOOLS* bools)
 {
@@ -94,14 +95,26 @@ void init_score(GAME_SCORE* score)
 
 void player_update(GAME_MAP* map, COORDINATES* player, GAME_SCORE* score, STATUS_BOOLS* bools)
 {
-    if(key[ALLEGRO_KEY_LEFT])
+    if(key[ALLEGRO_KEY_LEFT] || input_cache.key_left)
+    {
         check_move(map, player, -1, 0, score, bools);
-    if(key[ALLEGRO_KEY_RIGHT])
+        input_cache.key_left = false;
+    }
+    if(key[ALLEGRO_KEY_RIGHT] || input_cache.key_right)
+    {
         check_move(map, player, 1, 0, score, bools);
-    if(key[ALLEGRO_KEY_UP])
+        input_cache.key_right = false;
+    }
+    if(key[ALLEGRO_KEY_UP] || input_cache.key_up)
+    {
         check_move(map, player, 0, -1, score, bools);
-    if(key[ALLEGRO_KEY_DOWN])
+        input_cache.key_up = false;
+    }
+    if(key[ALLEGRO_KEY_DOWN] || input_cache.key_down)
+    {
         check_move(map, player, 0, 1, score, bools);
+        input_cache.key_down = false;
+    }
 }
 
 void check_move(GAME_MAP* map, COORDINATES* player, int x, int y, GAME_SCORE* score, STATUS_BOOLS* bools)

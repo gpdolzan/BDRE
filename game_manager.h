@@ -22,7 +22,11 @@
 
 typedef struct STATUS_BOOLS
 {
+    /* Menu related */
     bool menu_is_open;
+    bool leave_game;
+
+    /* Gameplay related */
     bool player_control;
     bool player_is_spawning;
     bool player_is_dead;
@@ -31,7 +35,8 @@ typedef struct STATUS_BOOLS
     bool level_win;
     bool game_win;
     bool restart_level;
-    bool leave_game;
+    
+    /* Redraws screen */
     bool redraw;
 
 }STATUS_BOOLS;

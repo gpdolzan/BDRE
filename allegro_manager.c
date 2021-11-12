@@ -14,9 +14,9 @@ void init_timers(MY_ALLEGRO_STRUCT* my_al_struct)
 {
     my_al_struct->timers.fps = al_create_timer(1.0/60.0);
     init_check(my_al_struct->timers.fps, "fps timer");
-    my_al_struct->timers.player_move = al_create_timer(1.0/12.0);
-    init_check(my_al_struct->timers.player_move, "player move timer");
-    my_al_struct->timers.game_tick = al_create_timer(1.0/8.0);
+    //my_al_struct->timers.player_move = al_create_timer(1.0/12.0);
+    //init_check(my_al_struct->timers.player_move, "player move timer");
+    my_al_struct->timers.game_tick = al_create_timer(1.0/6.0);
     init_check(my_al_struct->timers.game_tick, "game tick timer");
     my_al_struct->timers.game_second = al_create_timer(1.0);
     init_check(my_al_struct->timers.game_second, "game second timer");
@@ -25,7 +25,7 @@ void init_timers(MY_ALLEGRO_STRUCT* my_al_struct)
 void start_timers(MY_ALLEGRO_STRUCT* my_al_struct)
 {
     al_start_timer(my_al_struct->timers.fps);
-    al_start_timer(my_al_struct->timers.player_move);
+    //al_start_timer(my_al_struct->timers.player_move);
     al_start_timer(my_al_struct->timers.game_second);
     al_start_timer(my_al_struct->timers.game_tick);
 }
@@ -42,7 +42,7 @@ void register_queue(MY_ALLEGRO_STRUCT* my_al_struct)
     al_register_event_source(my_al_struct->queue, al_get_keyboard_event_source());
     al_register_event_source(my_al_struct->queue, al_get_display_event_source(my_al_struct->display));
     al_register_event_source(my_al_struct->queue, al_get_timer_event_source(my_al_struct->timers.fps));
-    al_register_event_source(my_al_struct->queue, al_get_timer_event_source(my_al_struct->timers.player_move));
+    //al_register_event_source(my_al_struct->queue, al_get_timer_event_source(my_al_struct->timers.player_move));
     al_register_event_source(my_al_struct->queue, al_get_timer_event_source(my_al_struct->timers.game_tick));
     al_register_event_source(my_al_struct->queue, al_get_timer_event_source(my_al_struct->timers.game_second));
 }
@@ -97,6 +97,14 @@ void keyboard_update(MY_ALLEGRO_STRUCT* my_al_struct)
 
         case ALLEGRO_EVENT_KEY_DOWN:
             key[my_al_struct->event.keyboard.keycode] = KEY_SEEN | KEY_RELEASED;
+            if(key[my_al_struct->event.keyboard.keycode] == key[ALLEGRO_KEY_LEFT])
+                input_cache.key_left = true;
+            if(key[my_al_struct->event.keyboard.keycode] == key[ALLEGRO_KEY_RIGHT])
+                input_cache.key_right = true;
+            if(key[my_al_struct->event.keyboard.keycode] == key[ALLEGRO_KEY_UP])
+                input_cache.key_up = true;
+            if(key[my_al_struct->event.keyboard.keycode] == key[ALLEGRO_KEY_DOWN])
+                input_cache.key_down = true;
             break;
         case ALLEGRO_EVENT_KEY_UP:
             key[my_al_struct->event.keyboard.keycode] &= KEY_RELEASED;

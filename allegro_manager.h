@@ -25,6 +25,16 @@
 
 unsigned char key[ALLEGRO_KEY_MAX];
 
+typedef struct INPUT_CACHE
+{
+    bool key_up;
+    bool key_down;
+    bool key_right;
+    bool key_left;
+}INPUT_CACHE;
+
+INPUT_CACHE input_cache;
+
 typedef struct MY_ALLEGRO_SPRITES
 {
     ALLEGRO_BITMAP* stone_brick;
@@ -55,7 +65,7 @@ typedef struct MY_ALLEGRO_TIMERS
 {
     ALLEGRO_TIMER* fps;
     ALLEGRO_TIMER* game_tick;
-    ALLEGRO_TIMER* player_move;
+    //ALLEGRO_TIMER* player_move;
     ALLEGRO_TIMER* game_second;
 
 }MY_ALLEGRO_TIMERS;
