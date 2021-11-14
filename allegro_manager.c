@@ -112,6 +112,13 @@ void keyboard_update(MY_ALLEGRO_STRUCT* my_al_struct)
     }
 }
 
+/* Fonts */
+void font_init(MY_ALLEGRO_STRUCT* my_al_struct)
+{
+    my_al_struct->font = al_load_font("./resources/fonts/Barlow-Bold.ttf", 32, 0);
+    init_check(my_al_struct->font, "BARLOW font initialization");
+}
+
 /* Sprites */
 void sprites_init(MY_ALLEGRO_STRUCT* my_al_struct)
 {
@@ -161,9 +168,13 @@ void terrain_draw(GAME_MAP* map, MY_ALLEGRO_STRUCT* my_al_struct)
                 al_draw_bitmap(my_al_struct->sprites.gem, (j * 16), ((i * 16) + 32), 0);
             if(map->map[i][j] == FALLING_GEM)
                 al_draw_bitmap(my_al_struct->sprites.gem, (j * 16), ((i * 16) + 32), 0);
+            if(map->map[i][j] == GEM_MOVED)
+                al_draw_bitmap(my_al_struct->sprites.gem, (j * 16), ((i * 16) + 32), 0);
             if(map->map[i][j] == BOULDER)
                 al_draw_bitmap(my_al_struct->sprites.boulder, (j * 16), ((i * 16) + 32), 0);
             if(map->map[i][j] == FALLING_BOULDER)
+                al_draw_bitmap(my_al_struct->sprites.boulder, (j * 16), ((i * 16) + 32), 0);
+            if(map->map[i][j] == BOULDER_MOVED)
                 al_draw_bitmap(my_al_struct->sprites.boulder, (j * 16), ((i * 16) + 32), 0);
             if(map->map[i][j] == PLAYER)
                 al_draw_bitmap(my_al_struct->sprites.miner, (j * 16), ((i * 16) + 32), 0);
@@ -173,4 +184,11 @@ void terrain_draw(GAME_MAP* map, MY_ALLEGRO_STRUCT* my_al_struct)
                 al_draw_bitmap(my_al_struct->sprites.hatch, (j * 16), ((i * 16) + 32), 0);
         }
     }
+}
+
+void hud_draw(MY_ALLEGRO_STRUCT* my_al_struct, int gems_collected, int gems_needed, int gems_total, long timer, long hud_score)
+{
+    al_draw_textf(my_al_struct->font, al_map_rgb(255, 255, 255), 16, 0, 0, "%02d/%02d - %02d", gems_collected, gems_total, gems_needed);
+    al_draw_textf(my_al_struct->font, al_map_rgb(255, 255, 255), 640/2, 0, ALLEGRO_ALIGN_CENTRE, "%03ld", timer);
+    al_draw_textf(my_al_struct->font, al_map_rgb(255, 255, 255), 640-16, 0, ALLEGRO_ALIGN_RIGHT, "%06ld", hud_score);
 }

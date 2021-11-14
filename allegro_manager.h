@@ -105,11 +105,15 @@ void display_clear(MY_ALLEGRO_STRUCT* my_al_struct);
 void keyboard_init();
 void keyboard_update(MY_ALLEGRO_STRUCT* my_al_struct);
 
+/* Fonts */
+void font_init(MY_ALLEGRO_STRUCT* my_al_struct);
+
 /* Sprites */
 void sprites_init(MY_ALLEGRO_STRUCT* my_al_struct);
 void sprites_deinit(MY_ALLEGRO_STRUCT* my_al_struct);
 
 /* Draw */
 void terrain_draw(GAME_MAP* map, MY_ALLEGRO_STRUCT* my_al_struct);
+void hud_draw(MY_ALLEGRO_STRUCT* my_al_struct, int gems_collected, int gems_needed, int gems_total, long timer, long hud_score);
 
 #endif

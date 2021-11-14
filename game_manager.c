@@ -1,17 +1,17 @@
 #include "game_manager.h"
+#include "map_reader.h"
 #include "allegro_manager.h"
 
 void initialize_bools(STATUS_BOOLS* bools)
 {
+    bools->map_is_loaded = false;
     bools->menu_is_open = true;
-    bools->player_control = false;
     bools->game_win = false;
     bools->level_win = false;
     bools->player_is_dead = false;
-    bools->is_time_ticking = false;
     bools->is_time_up = false;
     bools->restart_level = false;
-    bools->player_is_spawning = false;
+    bools->hatch_is_open = false;
     bools->leave_game = false;
     bools->redraw = true;
 
@@ -20,56 +20,116 @@ void initialize_bools(STATUS_BOOLS* bools)
 
 void terrain_update(GAME_MAP* map, STATUS_BOOLS* bools)
 {
-    for(int i = (map->height - 1); i > 0; i--)
+    for(int i = 0; i < map->height; i++)
     {
-        for(int j = (map->width - 1); j > 0; j--)
-        {
-            if((map->map[i][j] == BOULDER) || (map->map[i][j] == GEM || map->map[i][j] == FALLING_GEM) || (map->map[i][j] == FALLING_BOULDER))
-                check_fall_status(map, j, i, bools);
-            if((map->map[i][j] == GEM) || (map->map[i][j] == BOULDER))
+        for(int j = 0; j < map->width; j++)
+        {  
+            if (map->map[i][j] == BOULDER || map->map[i][j] == GEM || map->map[i][j] == FALLING_GEM || map->map[i][j] == FALLING_BOULDER)
+            {
+                update_fall(map, j, i, check_fall_status(map, j, i), bools);
+            }
+            if((map->map[i][j] == GEM) || (map->map[i][j] == BOULDER) || (map->map[i][j] == FALLING_GEM) || (map->map[i][j] == FALLING_BOULDER))
                 check_roll_status(map, j, i);
         }
     }
     return;
 }
 
-void check_fall_status(GAME_MAP* map, int x, int y, STATUS_BOOLS* bools)
+void reset_movement(GAME_MAP* map)
 {
-    bool is_boulder = false;
+    for(int i = 0; i < map->height; i++)
+    {
+        for(int j = 0; j < map->width; j++)
+        {
+            if((map->map[i][j] == BOULDER_MOVED) || (map->map[i][j] == GEM_MOVED))
+            {
+                if(map->map[i][j] == BOULDER_MOVED)
+                {
+                    if(map->map[i + 1][j] == AIR || map->map[i + 1][j] == PLAYER)
+                        map->map[i][j] = FALLING_BOULDER;
+                    else if(map->map[i + 1][j] != AIR && map->map[i + 1][j] != PLAYER)
+                    map->map[i][j] = BOULDER;
+                }
+
+                else if(map->map[i][j] == GEM_MOVED)
+                {
+                    if(map->map[i + 1][j] == AIR || map->map[i + 1][j] == PLAYER)
+                        map->map[i][j] = FALLING_GEM;
+                    else if(map->map[i + 1][j] != AIR && map->map[i + 1][j] != PLAYER)
+                        map->map[i][j] = GEM;
+                }
+            }
+        }
+    }
+}
+
+int check_fall_status(GAME_MAP* map, int x, int y)
+{
+    // returning 0 means the object can fall, but is not falling [BOULDER]
+    // returning 1 means the object can fall and is falling [FALLING_BOULDER]
+    // returning 2 means the object can fall and is falling right above the player's character [BOULDER_MOVED]
+    // returning 3 means the object can fall, but is not falling [GEM]
+    // returning 4 means the object can fall and is falling [FALLING_GEM]
+    // returning 5 means the object can fall and is falling right above the player's character [GEM_MOVED]
 
     if(map->map[y][x] == BOULDER || map->map[y][x] == FALLING_BOULDER)
-        is_boulder = true;
-
-    //Check Fall
-    if(map->map[y + 1][x] == AIR)
-        update_fall(map, x, y, is_boulder);
-    else if (map->map[y][x] == FALLING_BOULDER || map->map[y][x] == FALLING_GEM)
-        stop_fall(map, x, y, is_boulder, bools);
-    return;
-}
-
-void update_fall(GAME_MAP* map, int x, int y, bool is_boulder)
-{
-    map->map[y][x] = AIR;
-    if(is_boulder)
-        map->map[y + 1][x] = FALLING_BOULDER;
-    else
-        map->map[y + 1][x] = FALLING_GEM;
-    return;
-}
-
-void stop_fall(GAME_MAP* map, int x, int y, bool is_boulder, STATUS_BOOLS* bools)
-{
-    if(map->map[y + 1][x] == PLAYER)
-        kill_player(map, y + 1, x, bools, BOULDER_CRUSH);
-    else
     {
-        if(is_boulder)
-            map->map[y][x] = BOULDER;
+        if(map->map[y + 1][x] == PLAYER && map->map[y][x] == FALLING_BOULDER)
+            return 2; // boulder is falling (will kill player)
+        else if(map->map[y + 1][x] == AIR)
+            return 1; // boulder is falling
         else
-            map->map[y][x] = GEM;
+            return 0; // boulder is not moving
     }
-    return;
+
+    if(map->map[y][x] == GEM || map->map[y][x] == FALLING_GEM)
+    {
+        if(map->map[y + 1][x] == PLAYER && map->map[y][x] == FALLING_GEM)
+            return 5; // gem is falling (will kill player)
+        else if(map->map[y + 1][x] == AIR)
+            return 4; // gem is falling
+        else
+            return 3; // gem is not moving
+    }
+    return 0;
+}
+
+void update_fall(GAME_MAP* map, int x, int y, int fall_status, STATUS_BOOLS* bools)
+{
+
+    // returning 0 means the object can fall, but is not falling [BOULDER]
+    // returning 1 means the object can fall and is falling [FALLING_BOULDER]
+    // returning 2 means the object can fall and is falling right above the player's character [FALLING_BOULDER]
+    // returning 3 means the object can fall, but is not falling [GEM]
+    // returning 4 means the object can fall and is falling [FALLING_GEM]
+    // returning 5 means the object can fall and is falling right above the player's character [FALLING_GEM]
+
+    if(fall_status == 0)
+        return;
+    else if(fall_status == 1)
+    {
+        map->map[y][x] = AIR;
+        map->map[y + 1][x] = BOULDER_MOVED;
+        return;
+    }
+    else if(fall_status == 2)
+    {
+        kill_player(map, y + 1, x, bools, BOULDER_CRUSH);
+        return;
+    }
+    else if(fall_status == 3)
+        return;
+    else if(fall_status == 4)
+    {
+        map->map[y][x] = AIR;
+        map->map[y + 1][x] = GEM_MOVED;
+        return;
+    }
+    else if(fall_status == 5)
+    {
+        kill_player(map, y + 1, x, bools, GEM_CRUSH);
+        return;
+    }
 }
 
 void init_player(GAME_MAP* map, COORDINATES* player)
@@ -87,10 +147,51 @@ void init_player(GAME_MAP* map, COORDINATES* player)
     }
 }
 
-void init_score(GAME_SCORE* score)
+void init_hatch(GAME_MAP* map, COORDINATES* hatch)
 {
+    for(int i = 0; i < map->height; i++)
+    {
+        for(int j = 0; j < map->width; j++)
+        {
+            if(map->map[i][j] == HATCH)
+            {
+                hatch->y = i;
+                hatch->x = j;
+            }
+        }
+    }
+}
+
+void open_hatch(GAME_MAP* map, COORDINATES* hatch)
+{
+    for(int i = 0; i < map->height; i++)
+    {
+        for(int j = 0; j < map->width; j++)
+        {
+            if(map->map[i][j] == HATCH)
+            {
+                hatch->y = i;
+                hatch->x = j;
+            }
+        }
+    }
+
+    map->map[hatch->y][hatch->x] = OPEN_HATCH;
+}
+
+void init_score(GAME_SCORE* score, MAP_STORER* ms)
+{
+    score->gems_collected = 0;
+    score->gems_needed = ms->game_map_array[0].gems_needed;
+    score->timer = ms->game_map_array[0].map_timer;
     score->game_score = 0;
-    score->score_display = 0;
+}
+
+void restart_score(GAME_SCORE* score, int current_level, MAP_STORER* ms)
+{
+    score->gems_collected = 0;
+    score->gems_needed = ms->game_map_array[current_level].gems_needed;
+    score->timer = ms->game_map_array[current_level].map_timer;
 }
 
 void player_update(GAME_MAP* map, COORDINATES* player, GAME_SCORE* score, STATUS_BOOLS* bools)
@@ -133,6 +234,7 @@ void check_move(GAME_MAP* map, COORDINATES* player, int x, int y, GAME_SCORE* sc
     if(map->map[player->y + y][player->x + x] == GEM)
     {
         update_move(map, player, x, y);
+        score->gems_collected++;
         add_score(score, GEM);
         return;
     }
@@ -145,7 +247,7 @@ void check_move(GAME_MAP* map, COORDINATES* player, int x, int y, GAME_SCORE* sc
         }
         return;
     }
-    if(map->map[player->y][player->x + x] == OPEN_HATCH)
+    if(map->map[player->y + y][player->x + x] == OPEN_HATCH)
     {
         bools->level_win = true;
         return;
@@ -157,8 +259,8 @@ void update_move(GAME_MAP* map, COORDINATES* player, int dest_x, int dest_y)
 {
     map->map[player->y][player->x] = AIR;
     map->map[player->y + dest_y][player->x + dest_x] = PLAYER;
-    player->y += dest_y;
-    player->x += dest_x;
+    player->y = player->y + dest_y;
+    player->x = player->x + dest_x;
 }
 
 bool check_boulder_push(GAME_MAP* map, int dest_x, int dest_y)
@@ -171,13 +273,11 @@ bool check_boulder_push(GAME_MAP* map, int dest_x, int dest_y)
 void push_boulder(GAME_MAP* map, int ori_y, int ori_x, int dest_y, int dest_x)
 {
     map->map[ori_y][ori_x] = AIR;
-    map->map[dest_y][dest_x] = BOULDER;
+    map->map[dest_y][dest_x] = BOULDER_MOVED;
 }
 
 void add_score(GAME_SCORE* score, int flag)
 {
-    if(flag == DIRT)
-        score->game_score += 2;
     if(flag == GEM)
         score->game_score += 100;
 }
@@ -198,9 +298,7 @@ void kill_player(GAME_MAP* map, int y, int x, STATUS_BOOLS* bools, int death_fla
     if(death_flag == TIMER_RAN_OUT)
         bools->is_time_up = true;
 
-    bools->is_time_ticking = false;
     bools->player_is_dead = true;
-    bools->player_control = false;
     return;
 }
 
@@ -208,10 +306,10 @@ void check_roll_status(GAME_MAP* map, int x, int y)
 {
     bool is_boulder = false;
 
-    if(map->map[y][x] == BOULDER)
+    if(map->map[y][x] == BOULDER || map->map[y][x] == FALLING_BOULDER)
         is_boulder = true;
 
-    if(map->map[y + 1][x] == BOULDER || map->map[y + 1][x] == GEM)
+    if(map->map[y + 1][x] == BOULDER || map->map[y + 1][x] == GEM || map->map[y + 1][x] == FALLING_BOULDER || map->map[y + 1][x] == FALLING_GEM)
     {
         //Check right-side
         if(map->map[y][x + 1] == AIR && map->map[y + 1][x + 1] == AIR)
@@ -227,8 +325,17 @@ void update_roll(GAME_MAP* map, int x, int y, bool is_boulder, int direction)
 {
     map->map[y][x] = AIR;
     if(is_boulder)
-        map->map[y][x + direction] = FALLING_BOULDER;
+        map->map[y][x + direction] = BOULDER_MOVED;
     else
-        map->map[y][x + direction] = FALLING_GEM;
+        map->map[y][x + direction] = GEM_MOVED;
     return;
+}
+
+void hud_timer_update(GAME_SCORE* score, STATUS_BOOLS* bools)
+{
+    if(score->timer >= 1)
+        score->timer--;
+
+    if(score->timer == 0)
+        bools->is_time_up = true;
 }

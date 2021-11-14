@@ -8,6 +8,7 @@ typedef struct GAME_MAP
 {
     int map_timer;
     int gems_needed;
+    int gems_total;
     int width;
     int height;
     int** map;

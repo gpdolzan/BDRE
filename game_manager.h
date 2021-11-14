@@ -17,20 +17,23 @@
 #define HATCH 9
 #define OPEN_HATCH 10
 
+#define BOULDER_MOVED 99
+#define GEM_MOVED 98
+
 #define BOULDER_CRUSH 100
-#define TIMER_RAN_OUT 101
+#define GEM_CRUSH 101
+#define TIMER_RAN_OUT 102
 
 typedef struct STATUS_BOOLS
 {
     /* Menu related */
     bool menu_is_open;
+    bool map_is_loaded;
     bool leave_game;
 
     /* Gameplay related */
-    bool player_control;
-    bool player_is_spawning;
     bool player_is_dead;
-    bool is_time_ticking;
+    bool hatch_is_open;
     bool is_time_up;
     bool level_win;
     bool game_win;
@@ -50,18 +53,24 @@ typedef struct COORDINATES
 
 typedef struct GAME_SCORE
 {
+    int gems_collected;
+    int gems_needed;
+    int gems_total;
+    long timer;
     long game_score;
-    long score_display;
     
 }GAME_SCORE;
 
 void initialize_bools(STATUS_BOOLS* bools);
 void terrain_update(GAME_MAP* map, STATUS_BOOLS* bools);
-void check_fall_status(GAME_MAP* map, int x, int y, STATUS_BOOLS* bools);
-void update_fall(GAME_MAP* map, int x, int y, bool is_boulder);
-void stop_fall(GAME_MAP* map, int x, int y, bool is_boulder, STATUS_BOOLS* bools);
+int check_fall_status(GAME_MAP* map, int x, int y);
+void update_fall(GAME_MAP* map, int x, int y, int fall_status, STATUS_BOOLS* bools);
+void reset_movement(GAME_MAP* map);
 void init_player(GAME_MAP* map, COORDINATES* player);
-void init_score(GAME_SCORE* score);
+void init_hatch(GAME_MAP* map, COORDINATES* hatch);
+void open_hatch(GAME_MAP* map, COORDINATES* hatch);
+void init_score(GAME_SCORE* score, MAP_STORER* ms);
+void restart_score(GAME_SCORE* score, int current_level, MAP_STORER* ms);
 void player_update(GAME_MAP* map, COORDINATES* player, GAME_SCORE* score, STATUS_BOOLS* bools);
 void check_move(GAME_MAP* map, COORDINATES* player, int x, int y, GAME_SCORE* score, STATUS_BOOLS* bools);
 void update_move(GAME_MAP* map, COORDINATES* player, int dest_x, int dest_y);
@@ -70,6 +79,7 @@ bool check_boulder_push(GAME_MAP* map, int dest_x, int dest_y);
 void push_boulder(GAME_MAP* map, int ori_x, int ori_y, int dest_x, int dest_y);
 void kill_player(GAME_MAP* map, int y, int x, STATUS_BOOLS* bools, int death_flag);
 void check_roll_status(GAME_MAP* map, int x, int y);
-void update_roll(GAME_MAP* map, int x, int y, bool is_boulder, int direction);;
+void update_roll(GAME_MAP* map, int x, int y, bool is_boulder, int direction);
+void hud_timer_update(GAME_SCORE* score, STATUS_BOOLS* bools);
 
 #endif
