@@ -2,8 +2,8 @@
 #define GAME_MANAGER_H
 
 #include <stdbool.h>
-#include "map_reader.h"
 #include "allegro_manager.h"
+#include "map_reader.h"
 
 #define AIR 0
 #define PLAYER 1
@@ -16,9 +16,18 @@
 #define BOUNDS 8
 #define HATCH 9
 #define OPEN_HATCH 10
+#define CLOCK 11
+#define GOLD 12
+#define FALLING_GOLD 13
+#define FIREFLY_UP 14
+#define FIREFLY_RIGHT 15
+#define FIREFLY_DOWN 16
+#define FIREFLY_LEFT 17
 
-#define BOULDER_MOVED 99
-#define GEM_MOVED 98
+#define BOULDER_MOVED 96
+#define GEM_MOVED 97
+#define GOLD_MOVED 98
+#define FIREFLY_MOVED 99
 
 #define BOULDER_CRUSH 100
 #define GEM_CRUSH 101
@@ -27,7 +36,10 @@
 typedef struct STATUS_BOOLS
 {
     /* Menu related */
+    bool game_has_started;
     bool menu_is_open;
+    bool help_is_open;
+    bool fame_is_open;
     bool map_is_loaded;
     bool leave_game;
 
@@ -38,6 +50,11 @@ typedef struct STATUS_BOOLS
     bool level_win;
     bool game_win;
     bool restart_level;
+
+    /* Easter Egg Related */
+    bool timelord;  // Key 1
+    bool midas;     // Key 2
+    bool roxploder; // Key 3
     
     /* Redraws screen */
     bool redraw;
@@ -62,24 +79,26 @@ typedef struct GAME_SCORE
 }GAME_SCORE;
 
 void initialize_bools(STATUS_BOOLS* bools);
-void terrain_update(GAME_MAP* map, STATUS_BOOLS* bools);
+void terrain_update(GAME_MAP* map, STATUS_BOOLS* bools, MY_ALLEGRO_SAMPLES* samples);
+void remove_rocks(GAME_MAP* map);
+void goldify_rocks(GAME_MAP* map);
 int check_fall_status(GAME_MAP* map, int x, int y);
-void update_fall(GAME_MAP* map, int x, int y, int fall_status, STATUS_BOOLS* bools);
+void update_fall(GAME_MAP* map, int x, int y, int fall_status, STATUS_BOOLS* bools, MY_ALLEGRO_SAMPLES* samples);
 void reset_movement(GAME_MAP* map);
 void init_player(GAME_MAP* map, COORDINATES* player);
 void init_hatch(GAME_MAP* map, COORDINATES* hatch);
 void open_hatch(GAME_MAP* map, COORDINATES* hatch);
 void init_score(GAME_SCORE* score, MAP_STORER* ms);
 void restart_score(GAME_SCORE* score, int current_level, MAP_STORER* ms);
-void player_update(GAME_MAP* map, COORDINATES* player, GAME_SCORE* score, STATUS_BOOLS* bools);
-void check_move(GAME_MAP* map, COORDINATES* player, int x, int y, GAME_SCORE* score, STATUS_BOOLS* bools);
+void player_update(GAME_MAP* map, COORDINATES* player, GAME_SCORE* score, STATUS_BOOLS* bools, MY_ALLEGRO_STRUCT* my_al_struct);
+void check_move(GAME_MAP* map, COORDINATES* player, int x, int y, GAME_SCORE* score, STATUS_BOOLS* bools, MY_ALLEGRO_STRUCT* my_al_struct);
 void update_move(GAME_MAP* map, COORDINATES* player, int dest_x, int dest_y);
-void add_score(GAME_SCORE* score, int flag);
+void add_score(GAME_SCORE* score, int flag, MY_ALLEGRO_STRUCT* my_al_struct);
 bool check_boulder_push(GAME_MAP* map, int dest_x, int dest_y);
 void push_boulder(GAME_MAP* map, int ori_x, int ori_y, int dest_x, int dest_y);
-void kill_player(GAME_MAP* map, int y, int x, STATUS_BOOLS* bools, int death_flag);
+void kill_player(GAME_MAP* map, int y, int x, MY_ALLEGRO_SAMPLES* samples);
 void check_roll_status(GAME_MAP* map, int x, int y);
-void update_roll(GAME_MAP* map, int x, int y, bool is_boulder, int direction);
+void update_roll(GAME_MAP* map, int x, int y, int object, int direction);
 void hud_timer_update(GAME_SCORE* score, STATUS_BOOLS* bools);
 
 #endif

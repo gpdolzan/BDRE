@@ -1,5 +1,18 @@
 #include "allegro_manager.h"
 
+/* Input cache */
+void reset_input_cache()
+{
+    input_cache.key_1 = false;
+    input_cache.key_2 = false;
+    input_cache.key_3 = false;
+    input_cache.key_down = false;
+    input_cache.key_up = false;
+    input_cache.key_left = false;
+    input_cache.key_right = false;
+    input_cache.key_r = false;
+}
+
 /* General */
 void init_check(bool test, char* description)
 {
@@ -14,8 +27,6 @@ void init_timers(MY_ALLEGRO_STRUCT* my_al_struct)
 {
     my_al_struct->timers.fps = al_create_timer(1.0/60.0);
     init_check(my_al_struct->timers.fps, "fps timer");
-    //my_al_struct->timers.player_move = al_create_timer(1.0/12.0);
-    //init_check(my_al_struct->timers.player_move, "player move timer");
     my_al_struct->timers.game_tick = al_create_timer(1.0/6.0);
     init_check(my_al_struct->timers.game_tick, "game tick timer");
     my_al_struct->timers.game_second = al_create_timer(1.0);
@@ -99,12 +110,20 @@ void keyboard_update(MY_ALLEGRO_STRUCT* my_al_struct)
             key[my_al_struct->event.keyboard.keycode] = KEY_SEEN | KEY_RELEASED;
             if(key[my_al_struct->event.keyboard.keycode] == key[ALLEGRO_KEY_LEFT])
                 input_cache.key_left = true;
-            if(key[my_al_struct->event.keyboard.keycode] == key[ALLEGRO_KEY_RIGHT])
+            else if(key[my_al_struct->event.keyboard.keycode] == key[ALLEGRO_KEY_RIGHT])
                 input_cache.key_right = true;
-            if(key[my_al_struct->event.keyboard.keycode] == key[ALLEGRO_KEY_UP])
+            else if(key[my_al_struct->event.keyboard.keycode] == key[ALLEGRO_KEY_UP])
                 input_cache.key_up = true;
-            if(key[my_al_struct->event.keyboard.keycode] == key[ALLEGRO_KEY_DOWN])
+            else if(key[my_al_struct->event.keyboard.keycode] == key[ALLEGRO_KEY_DOWN])
                 input_cache.key_down = true;
+            else if(key[my_al_struct->event.keyboard.keycode] == key[ALLEGRO_KEY_R])
+                input_cache.key_r = true;
+            else if(key[my_al_struct->event.keyboard.keycode] == key[ALLEGRO_KEY_1])
+                input_cache.key_1 = true;
+            else if(key[my_al_struct->event.keyboard.keycode] == key[ALLEGRO_KEY_2])
+                input_cache.key_2 = true;
+            else if(key[my_al_struct->event.keyboard.keycode] == key[ALLEGRO_KEY_3])
+                input_cache.key_3 = true;
             break;
         case ALLEGRO_EVENT_KEY_UP:
             key[my_al_struct->event.keyboard.keycode] &= KEY_RELEASED;
@@ -119,10 +138,68 @@ void font_init(MY_ALLEGRO_STRUCT* my_al_struct)
     init_check(my_al_struct->font, "BARLOW font initialization");
 }
 
+/* Audio */
+void audio_init(MY_ALLEGRO_SAMPLES* samples)
+{
+
+    al_install_audio();
+    al_init_acodec_addon();
+    al_reserve_samples(128);
+
+    samples->sample_click = al_load_sample("./resources/SFX/click.ogg");
+    init_check(samples->sample_click, "audio click");
+    samples->sample_gem_collect = al_load_sample("./resources/SFX/collect_gem.ogg");
+    init_check(samples->sample_gem_collect, "audio sample gem collect");
+    samples->sample_explosion = al_load_sample("./resources/SFX/explosion.ogg");
+    init_check(samples->sample_explosion, "audio sample explosion");
+    samples->sample_hatch_open = al_load_sample("./resources/SFX/hatch_open.ogg");
+    init_check(samples->sample_hatch_open, "audio sample hatch open");
+}
+
+void play_click(MY_ALLEGRO_SAMPLES* samples)
+{
+    al_play_sample(samples->sample_click, 0.75, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+}
+
+void play_gem_collect(MY_ALLEGRO_SAMPLES* samples)
+{
+    al_play_sample(samples->sample_gem_collect, 0.75, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+}
+
+void play_explosion(MY_ALLEGRO_SAMPLES* samples)
+{
+    al_play_sample(samples->sample_explosion, 0.75, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+}
+
+void play_hatch_open(MY_ALLEGRO_SAMPLES* samples)
+{
+    al_play_sample(samples->sample_hatch_open, 0.9, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+}
+
+void audio_deinit(MY_ALLEGRO_SAMPLES* samples)
+{
+    al_destroy_sample(samples->sample_click);
+    al_destroy_sample(samples->sample_gem_collect);
+    al_destroy_sample(samples->sample_explosion);
+    al_destroy_sample(samples->sample_hatch_open);
+}
+
+
 /* Sprites */
+
+ALLEGRO_BITMAP* sprite_grab(MY_ALLEGRO_STRUCT* my_al_struct, int x, int y, int w, int h)
+{
+    ALLEGRO_BITMAP* sprite = al_create_sub_bitmap(my_al_struct->sprites.explosion_sheet, x, y, w, h);
+    init_check(sprite, "sprite grab");
+    return sprite;
+}
+
 void sprites_init(MY_ALLEGRO_STRUCT* my_al_struct)
 {
     init_check(al_init_image_addon(), "image");
+
+    my_al_struct->sprites.title_screen = al_load_bitmap("./resources/textures/title_screen.png");
+    init_check(my_al_struct->sprites.title_screen, "title screen sprite");
 
     my_al_struct->sprites.stone_brick = al_load_bitmap("./resources/textures/stone_brick.png");
     init_check(my_al_struct->sprites.stone_brick, "stone brick sprite");
@@ -134,10 +211,36 @@ void sprites_init(MY_ALLEGRO_STRUCT* my_al_struct)
     init_check(my_al_struct->sprites.boulder, "boulder sprite");
     my_al_struct->sprites.gem = al_load_bitmap("./resources/textures/gem.png");
     init_check(my_al_struct->sprites.gem, "gem sprite");
+    my_al_struct->sprites.clock = al_load_bitmap("./resources/textures/clock.png");
+    init_check(my_al_struct->sprites.clock, "clock sprite");
+    my_al_struct->sprites.gold = al_load_bitmap("./resources/textures/gold.png");
+    init_check(my_al_struct->sprites.gold, "gold sprite");
     my_al_struct->sprites.miner = al_load_bitmap("./resources/textures/miner.png");
     init_check(my_al_struct->sprites.miner, "miner sprite");
     my_al_struct->sprites.hatch = al_load_bitmap("./resources/textures/hatch.png");
     init_check(my_al_struct->sprites.hatch, "hatch sprite");
+    my_al_struct->sprites.open_hatch = al_load_bitmap("./resources/textures/open_hatch.png");
+    init_check(my_al_struct->sprites.open_hatch, "open hatch sprite");
+
+    my_al_struct->sprites.explosion_sheet = al_load_bitmap("./resources/textures/explosion.png");
+    init_check(my_al_struct->sprites.explosion_sheet, "explosion sheet sprite");
+
+    //int sprite_pos = 0;
+    //int x = 0;
+    //int y = 0;
+
+    /*for(int i = 0; i < 5; i++)
+    {
+        for(int j = 0; j < 9; j++)
+        {
+            my_al_struct->sprites.explosion[sprite_pos] = sprite_grab(my_al_struct, x, y, 16, 16);
+            sprite_pos++;
+            x += 16;
+        }
+        x = 0;
+        y += 16;
+    }*/
+
 }
 
 void sprites_deinit(MY_ALLEGRO_STRUCT* my_al_struct)
@@ -149,9 +252,45 @@ void sprites_deinit(MY_ALLEGRO_STRUCT* my_al_struct)
     al_destroy_bitmap(my_al_struct->sprites.gem);
     al_destroy_bitmap(my_al_struct->sprites.miner);
     al_destroy_bitmap(my_al_struct->sprites.hatch);
+    al_destroy_bitmap(my_al_struct->sprites.open_hatch);
+    al_destroy_bitmap(my_al_struct->sprites.clock);
+    al_destroy_bitmap(my_al_struct->sprites.gold);
+    al_destroy_bitmap(my_al_struct->sprites.explosion_sheet);
+
+    //for(int i = 0; i < 54; i++)
+       //al_destroy_bitmap(my_al_struct->sprites.explosion[i]);
 }
 
 /* Draw */
+void title_screen_draw(MY_ALLEGRO_STRUCT* my_al_struct)
+{
+    al_draw_bitmap(my_al_struct->sprites.title_screen, 0, 0, 0);
+    al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, ((BUFFER_H/2) - 48), ALLEGRO_ALIGN_CENTRE, "Press [P] to play the game!");
+    al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, BUFFER_H/2, ALLEGRO_ALIGN_CENTRE, "Press [F] to Hall of Fame!");
+    al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, ((BUFFER_H/2) + 48), ALLEGRO_ALIGN_CENTRE, "Press [H] to see help!");
+    al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, ((BUFFER_H/2) + 96), ALLEGRO_ALIGN_CENTRE, "Press [Esc] to quit!");
+}
+
+void hall_of_fame_draw(MY_ALLEGRO_STRUCT* my_al_struct, SCOREBOARD* sb)
+{
+    int sum = 48;
+
+    al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, 0, ALLEGRO_ALIGN_CENTRE, "Welcome to the HALL OF FAME!");
+    if(sb->sb_size > 0)
+    {
+        for(int i = 0; i < sb->sb_size; i++)
+        {
+            al_draw_textf(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, sum, ALLEGRO_ALIGN_CENTRE, "[Position: %d] [Score: %ld]", (i + 1), sb->scores_array[i]);
+            sum += 48;
+        }
+    }
+    else
+    {
+        al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, sum, ALLEGRO_ALIGN_CENTRE, "There is nothing here!");
+        al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, sum + sum, ALLEGRO_ALIGN_CENTRE, "Play the game and then come back here!");
+    }
+}
+
 void terrain_draw(GAME_MAP* map, MY_ALLEGRO_STRUCT* my_al_struct)
 {
     for(int i = 0; i < map->height; i++)
@@ -164,6 +303,14 @@ void terrain_draw(GAME_MAP* map, MY_ALLEGRO_STRUCT* my_al_struct)
                 al_draw_bitmap(my_al_struct->sprites.stone_brick, (j * 16), ((i * 16) + 32), 0);
             if(map->map[i][j] == DIRT)
                 al_draw_bitmap(my_al_struct->sprites.dirt, (j * 16), ((i * 16) + 32), 0);
+            if(map->map[i][j] == CLOCK)
+                al_draw_bitmap(my_al_struct->sprites.clock, (j * 16), ((i * 16) + 32), 0);
+            if(map->map[i][j] == GOLD)
+                al_draw_bitmap(my_al_struct->sprites.gold, (j * 16), ((i * 16) + 32), 0);
+            if(map->map[i][j] == FALLING_GOLD)
+                al_draw_bitmap(my_al_struct->sprites.gold, (j * 16), ((i * 16) + 32), 0);
+            if(map->map[i][j] == GOLD_MOVED)
+                al_draw_bitmap(my_al_struct->sprites.gold, (j * 16), ((i * 16) + 32), 0);
             if(map->map[i][j] == GEM)
                 al_draw_bitmap(my_al_struct->sprites.gem, (j * 16), ((i * 16) + 32), 0);
             if(map->map[i][j] == FALLING_GEM)
@@ -181,7 +328,7 @@ void terrain_draw(GAME_MAP* map, MY_ALLEGRO_STRUCT* my_al_struct)
             if(map->map[i][j] == HATCH)
                 al_draw_bitmap(my_al_struct->sprites.hatch, (j * 16), ((i * 16) + 32), 0);
             if(map->map[i][j] == OPEN_HATCH)
-                al_draw_bitmap(my_al_struct->sprites.hatch, (j * 16), ((i * 16) + 32), 0);
+                al_draw_bitmap(my_al_struct->sprites.open_hatch, (j * 16), ((i * 16) + 32), 0);
         }
     }
 }

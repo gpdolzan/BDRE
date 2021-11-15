@@ -4,10 +4,10 @@
 CFLAGS = -std=c99 -Wall -g
 LDLIBS = -lm
 PACKAGEFLAGS = pkg-config
-ALLEGRO5FLAGS = allegro-5 allegro_font-5 allegro_ttf-5  allegro_image-5  allegro_audio-5 allegro_acodec-5 --libs --cflags
+ALLEGRO5FLAGS = allegro-5 allegro_font-5 allegro_ttf-5 allegro_image-5 allegro_audio-5 allegro_acodec-5 --libs --cflags
 
 #object-files
-objects = main.o map_reader.o game_manager.o allegro_manager.o
+objects = main.o scoreboard.o map_reader.o game_manager.o allegro_manager.o
 
 #default execution
 all: boulderdash
@@ -17,6 +17,9 @@ boulderdash: $(objects)
 
 main.o: main.c
 	cc -c main.c $(CFLAGS)
+
+scoreboard.o: scoreboard.c
+	cc -c scoreboard.c $(CFLAGS)
 
 map_reader.o: map_reader.c
 	cc -c map_reader.c $(CFLAGS)

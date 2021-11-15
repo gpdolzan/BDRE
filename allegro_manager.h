@@ -3,15 +3,10 @@
 
 #include<stdio.h>
 
-#include <allegro5/allegro.h>
-#include <allegro5/allegro_font.h>
-#include <allegro5/allegro_ttf.h>
-#include <allegro5/allegro_audio.h>
-#include <allegro5/allegro_acodec.h>
-#include <allegro5/allegro_image.h>
-
-#include "map_reader.h"
+#include "allegro_structs.h"
 #include "game_manager.h"
+#include "map_reader.h"
+#include "scoreboard.h"
 
 #define BUFFER_W 640
 #define BUFFER_H 384
@@ -25,63 +20,8 @@
 
 unsigned char key[ALLEGRO_KEY_MAX];
 
-typedef struct INPUT_CACHE
-{
-    bool key_up;
-    bool key_down;
-    bool key_right;
-    bool key_left;
-}INPUT_CACHE;
-
 INPUT_CACHE input_cache;
-
-typedef struct MY_ALLEGRO_SPRITES
-{
-    ALLEGRO_BITMAP* stone_brick;
-    ALLEGRO_BITMAP* deepslate_brick;
-    ALLEGRO_BITMAP* dirt;
-
-    ALLEGRO_BITMAP* boulder;
-    ALLEGRO_BITMAP* gem;
-
-    ALLEGRO_BITMAP* miner;
-
-    ALLEGRO_BITMAP* hatch;
-
-}MY_ALLEGRO_SPRITES;
-
-typedef struct MY_ALLEGRO_SAMPLES
-{
-    ALLEGRO_SAMPLE* sample_dirt_dig[4];
-    ALLEGRO_SAMPLE* sample_stone_roll[3];
-    ALLEGRO_SAMPLE* sample_walk;
-    ALLEGRO_SAMPLE* sample_win;
-    ALLEGRO_SAMPLE* sample_gem_collect;
-    ALLEGRO_SAMPLE* sample_hatch_open;
-
-}MY_ALLEGRO_SAMPLES;
-
-typedef struct MY_ALLEGRO_TIMERS
-{
-    ALLEGRO_TIMER* fps;
-    ALLEGRO_TIMER* game_tick;
-    //ALLEGRO_TIMER* player_move;
-    ALLEGRO_TIMER* game_second;
-
-}MY_ALLEGRO_TIMERS;
-
-typedef struct MY_ALLEGRO_STRUCT
-{
-    ALLEGRO_DISPLAY* display;
-    ALLEGRO_BITMAP* display_buffer;
-    ALLEGRO_FONT* font;
-    MY_ALLEGRO_SAMPLES* samples;
-    ALLEGRO_EVENT_QUEUE* queue;
-    MY_ALLEGRO_TIMERS timers;
-    MY_ALLEGRO_SPRITES sprites;
-    ALLEGRO_EVENT event;
-
-}MY_ALLEGRO_STRUCT;
+void reset_input_cache();
 
 /* General */
 void init_check(bool test, char* description);
@@ -108,12 +48,23 @@ void keyboard_update(MY_ALLEGRO_STRUCT* my_al_struct);
 /* Fonts */
 void font_init(MY_ALLEGRO_STRUCT* my_al_struct);
 
+/* Audio */
+void audio_init(MY_ALLEGRO_SAMPLES* samples);
+void play_click(MY_ALLEGRO_SAMPLES* samples);
+void play_gem_collect(MY_ALLEGRO_SAMPLES* samples);
+void play_explosion(MY_ALLEGRO_SAMPLES* samples);
+void play_hatch_open(MY_ALLEGRO_SAMPLES* samples);
+void audio_deinit(MY_ALLEGRO_SAMPLES* samples);
+
 /* Sprites */
 void sprites_init(MY_ALLEGRO_STRUCT* my_al_struct);
+ALLEGRO_BITMAP* sprite_grab(MY_ALLEGRO_STRUCT* my_al_struct, int x, int y, int w, int h);
 void sprites_deinit(MY_ALLEGRO_STRUCT* my_al_struct);
 
 /* Draw */
 void terrain_draw(GAME_MAP* map, MY_ALLEGRO_STRUCT* my_al_struct);
 void hud_draw(MY_ALLEGRO_STRUCT* my_al_struct, int gems_collected, int gems_needed, int gems_total, long timer, long hud_score);
+void title_screen_draw(MY_ALLEGRO_STRUCT* my_al_struct);
+void hall_of_fame_draw(MY_ALLEGRO_STRUCT* my_al_struct, SCOREBOARD* sb);
 
 #endif
