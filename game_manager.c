@@ -36,9 +36,108 @@ void terrain_update(GAME_MAP* map, STATUS_BOOLS* bools, MY_ALLEGRO_SAMPLES* samp
             }
             if((map->map[i][j] == GEM) || (map->map[i][j] == BOULDER) || (map->map[i][j] == GOLD) || (map->map[i][j] == FALLING_GEM) || (map->map[i][j] == FALLING_BOULDER) || (map->map[i][j] == FALLING_GOLD))
                 check_roll_status(map, j, i);
+            if((map->map[i][j] == FIREFLY_UP) || (map->map[i][j] == FIREFLY_LEFT) || (map->map[i][j] == FIREFLY_DOWN) || (map->map[i][j] == FIREFLY_RIGHT))
+                update_firefly(map, j, i, check_firefly_status(map, j, i), bools, samples);
         }
     }
     return;
+}
+
+void update_firefly(GAME_MAP* map, int x, int y, int flag, STATUS_BOOLS* bools, MY_ALLEGRO_SAMPLES* samples)
+{
+    if((map->map[y][x] == FIREFLY_UP) && flag >= 1)
+    {
+        if(flag == 1)
+        {
+            map->map[y][x] = AIR;
+            map->map[y - 1][x] = FIREFLY_MOVED_UP;
+        }
+        else if(flag == 2)
+        {
+            bools->player_is_dead = true;
+            kill_player(map, y - 1, x, samples);
+        }
+        return;
+    }
+    if((map->map[y][x] == FIREFLY_LEFT) && flag >= 1)
+    {
+        if(flag == 1)
+        {
+            map->map[y][x] = AIR;
+            map->map[y][x - 1] = FIREFLY_MOVED_LEFT;
+        }
+        else if(flag == 2)
+        {
+            bools->player_is_dead = true;
+            kill_player(map, y, x - 1, samples);
+        }
+        return;
+    }
+    if((map->map[y][x] == FIREFLY_DOWN) && flag >= 1)
+    {
+        if(flag == 1)
+        {
+            map->map[y][x] = AIR;
+            map->map[y + 1][x] = FIREFLY_MOVED_DOWN;
+        }
+        else if(flag == 2)
+        {
+            bools->player_is_dead = true;
+            kill_player(map, y + 1, x, samples);
+        }
+        return;
+    }
+    if((map->map[y][x] == FIREFLY_RIGHT) && flag >= 1)
+    {
+        if(flag == 1)
+        {
+            map->map[y][x] = AIR;
+            map->map[y][x + 1] = FIREFLY_MOVED_RIGHT;
+        }
+        else if(flag == 2)
+        {
+            bools->player_is_dead = true;
+            kill_player(map, y, x + 1, samples);
+        }
+        return;
+    }
+}
+
+int check_firefly_status(GAME_MAP* map, int x, int y)
+{
+    if(map->map[y][x] == FIREFLY_UP)
+    {
+        if(map->map[y - 1][x] == AIR)
+            return 1;
+        else if(map->map[y - 1][x] == PLAYER)
+            return 2;
+        return 0;
+    }
+    if(map->map[y][x] == FIREFLY_LEFT)
+    {
+        if(map->map[y][x - 1] == AIR)
+            return 1;
+        else if(map->map[y][x - 1] == PLAYER)
+            return 2;
+        return 0;
+    }
+    if(map->map[y][x] == FIREFLY_DOWN)
+    {
+        if(map->map[y + 1][x] == AIR)
+            return 1;
+        else if(map->map[y + 1][x] == PLAYER)
+            return 2;
+        return 0;
+    }
+    if(map->map[y][x] == FIREFLY_RIGHT)
+    {
+        if(map->map[y][x + 1] == AIR)
+            return 1;
+        else if(map->map[y][x + 1] == PLAYER)
+            return 2;
+        return 0;
+    }
+    return 0;
 }
 
 void remove_rocks(GAME_MAP* map)
@@ -75,6 +174,7 @@ void reset_movement(GAME_MAP* map)
     {
         for(int j = 0; j < map->width; j++)
         {
+            // Checks Boulders, Gems and Gold
             if((map->map[i][j] == BOULDER_MOVED) || (map->map[i][j] == GEM_MOVED) || (map->map[i][j] == GOLD_MOVED))
             {
                 if(map->map[i][j] == BOULDER_MOVED)
@@ -99,6 +199,154 @@ void reset_movement(GAME_MAP* map)
                         map->map[i][j] = FALLING_GOLD;
                     else if(map->map[i + 1][j] != AIR && map->map[i + 1][j] != PLAYER)
                         map->map[i][j] = GOLD;
+                }
+            }
+
+            //Checks firefly movement
+            else if((map->map[i][j] == FIREFLY_MOVED_UP) || (map->map[i][j] == FIREFLY_MOVED_DOWN) || (map->map[i][j] == FIREFLY_MOVED_LEFT) || (map->map[i][j] == FIREFLY_MOVED_RIGHT))
+            {
+                // Check firefly up
+                if(map->map[i][j] == FIREFLY_MOVED_UP)
+                {
+                    // Can move left
+                    if(map->map[i][j - 1] == AIR || map->map[i][j - 1] == PLAYER)
+                    {
+                        map->map[i][j] = FIREFLY_LEFT;
+                        break;
+                    }
+
+                    // Can't move left
+                    else
+                    {   
+                        // Can move up
+                        if((map->map[i - 1][j] == AIR) || (map->map[i - 1][j] == PLAYER))
+                        {
+                            map->map[i][j] = FIREFLY_UP;
+                            break;
+                        }
+
+                        // Can move right
+                        if((map->map[i][j + 1] == AIR) || (map->map[i][j + 1] == PLAYER))
+                        {
+                            map->map[i][j] = FIREFLY_RIGHT;
+                            break;
+                        }
+
+                        // Can move down
+                        if((map->map[i + 1][j] == AIR) || (map->map[i + 1][j] == PLAYER))
+                        {
+                            map->map[i][j] = FIREFLY_DOWN;
+                            break;
+                        }
+                    }
+                }
+
+                // Check firefly left
+                if(map->map[i][j] == FIREFLY_MOVED_LEFT)
+                {
+                    // Can move down
+                    if(map->map[i + 1][j] == AIR || map->map[i + 1][j] == PLAYER)
+                    {
+                        map->map[i][j] = FIREFLY_DOWN;
+                        break;
+                    }
+
+                    // Can't move down
+                    else
+                    {   
+                        // Can move left
+                        if((map->map[i][j - 1] == AIR) || (map->map[i][j - 1] == PLAYER))
+                        {
+                            map->map[i][j] = FIREFLY_LEFT;
+                            break;
+                        }
+
+                        // Can move up
+                        if((map->map[i - 1][j] == AIR) || (map->map[i - 1][j] == PLAYER))
+                        {
+                            map->map[i][j] = FIREFLY_UP;
+                            break;
+                        }
+
+                        // Can move right
+                        if((map->map[i][j + 1] == AIR) || (map->map[i][j + 1] == PLAYER))
+                        {
+                            map->map[i][j] = FIREFLY_RIGHT;
+                            break;
+                        }
+                    }
+                }
+
+                // Check firefly down
+                if(map->map[i][j] == FIREFLY_MOVED_DOWN)
+                {
+                    // Can move right
+                    if(map->map[i][j + 1] == AIR || map->map[i][j + 1] == PLAYER)
+                    {
+                        map->map[i][j] = FIREFLY_RIGHT;
+                        break;
+                    }
+
+                    // Can't move right
+                    else
+                    {   
+                        // Can move down
+                        if((map->map[i + 1][j] == AIR) || (map->map[i + 1][j] == PLAYER))
+                        {
+                            map->map[i][j] = FIREFLY_DOWN;
+                            break;
+                        }
+
+                        // Can move left
+                        if((map->map[i][j - 1] == AIR) || (map->map[i][j - 1] == PLAYER))
+                        {
+                            map->map[i][j] = FIREFLY_LEFT;
+                            break;
+                        }
+
+                        // Can move up
+                        if((map->map[i - 1][j] == AIR) || (map->map[i - 1][j] == PLAYER))
+                        {
+                            map->map[i][j] = FIREFLY_UP;
+                            break;
+                        }
+                    }
+                }
+
+                // Check firefly right
+                if(map->map[i][j] == FIREFLY_MOVED_RIGHT)
+                {
+                    // Can move up
+                    if(map->map[i - 1][j] == AIR || map->map[i - 1][j] == PLAYER)
+                    {
+                        map->map[i][j] = FIREFLY_UP;
+                        break;
+                    }
+
+                    // Can't move up
+                    else
+                    {   
+                        // Can move right
+                        if((map->map[i][j + 1] == AIR) || (map->map[i][j + 1] == PLAYER))
+                        {
+                            map->map[i][j] = FIREFLY_RIGHT;
+                            break;
+                        }
+
+                        // Can move down
+                        if((map->map[i + 1][j] == AIR) || (map->map[i + 1][j] == PLAYER))
+                        {
+                            map->map[i][j] = FIREFLY_DOWN;
+                            break;
+                        }
+
+                        // Can move left
+                        if((map->map[i][j - 1] == AIR) || (map->map[i][j - 1] == PLAYER))
+                        {
+                            map->map[i][j] = FIREFLY_LEFT;
+                            break;
+                        }
+                    }
                 }
             }
         }
@@ -239,6 +487,7 @@ void init_hatch(GAME_MAP* map, COORDINATES* hatch)
 
 void open_hatch(GAME_MAP* map, COORDINATES* hatch)
 {
+    int found = 0;
     for(int i = 0; i < map->height; i++)
     {
         for(int j = 0; j < map->width; j++)
@@ -247,11 +496,15 @@ void open_hatch(GAME_MAP* map, COORDINATES* hatch)
             {
                 hatch->y = i;
                 hatch->x = j;
+                found = 1;
             }
         }
     }
 
-    map->map[hatch->y][hatch->x] = OPEN_HATCH;
+    if(found == 1)
+        map->map[hatch->y][hatch->x] = OPEN_HATCH;
+    else
+        return;
 }
 
 void init_score(GAME_SCORE* score, MAP_STORER* ms)

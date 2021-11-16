@@ -25,6 +25,7 @@ typedef struct INPUT_CACHE
 typedef struct MY_ALLEGRO_SPRITES
 {
     ALLEGRO_BITMAP* title_screen;
+    ALLEGRO_BITMAP* transparent_screen;
 
     ALLEGRO_BITMAP* stone_brick;
     ALLEGRO_BITMAP* deepslate_brick;
@@ -36,6 +37,7 @@ typedef struct MY_ALLEGRO_SPRITES
     ALLEGRO_BITMAP* gold;
 
     ALLEGRO_BITMAP* miner;
+    ALLEGRO_BITMAP* firefly;
 
     ALLEGRO_BITMAP* hatch;
     ALLEGRO_BITMAP* open_hatch;
@@ -70,6 +72,7 @@ typedef struct MY_ALLEGRO_STRUCT
     ALLEGRO_DISPLAY* display;
     ALLEGRO_BITMAP* display_buffer;
     ALLEGRO_FONT* font;
+    ALLEGRO_FONT* font16;
     ALLEGRO_EVENT_QUEUE* queue;
     MY_ALLEGRO_SAMPLES samples;
     MY_ALLEGRO_TIMERS timers;

@@ -136,6 +136,8 @@ void font_init(MY_ALLEGRO_STRUCT* my_al_struct)
 {
     my_al_struct->font = al_load_font("./resources/fonts/Barlow-Bold.ttf", 32, 0);
     init_check(my_al_struct->font, "BARLOW font initialization");
+    my_al_struct->font16 = al_load_font("./resources/fonts/Barlow-Bold.ttf", 16, 0);
+    init_check(my_al_struct->font16, "BARLOW font initialization");
 }
 
 /* Audio */
@@ -201,6 +203,9 @@ void sprites_init(MY_ALLEGRO_STRUCT* my_al_struct)
     my_al_struct->sprites.title_screen = al_load_bitmap("./resources/textures/title_screen.png");
     init_check(my_al_struct->sprites.title_screen, "title screen sprite");
 
+    my_al_struct->sprites.transparent_screen = al_load_bitmap("./resources/textures/dimmed_background.png");
+    init_check(my_al_struct->sprites.transparent_screen, "transparent screen sprite");
+
     my_al_struct->sprites.stone_brick = al_load_bitmap("./resources/textures/stone_brick.png");
     init_check(my_al_struct->sprites.stone_brick, "stone brick sprite");
     my_al_struct->sprites.deepslate_brick = al_load_bitmap("./resources/textures/ds_brick.png");
@@ -215,6 +220,8 @@ void sprites_init(MY_ALLEGRO_STRUCT* my_al_struct)
     init_check(my_al_struct->sprites.clock, "clock sprite");
     my_al_struct->sprites.gold = al_load_bitmap("./resources/textures/gold.png");
     init_check(my_al_struct->sprites.gold, "gold sprite");
+    my_al_struct->sprites.firefly = al_load_bitmap("./resources/textures/creeper.png");
+    init_check(my_al_struct->sprites.firefly, "firefly sprite");
     my_al_struct->sprites.miner = al_load_bitmap("./resources/textures/miner.png");
     init_check(my_al_struct->sprites.miner, "miner sprite");
     my_al_struct->sprites.hatch = al_load_bitmap("./resources/textures/hatch.png");
@@ -245,12 +252,15 @@ void sprites_init(MY_ALLEGRO_STRUCT* my_al_struct)
 
 void sprites_deinit(MY_ALLEGRO_STRUCT* my_al_struct)
 {
+    al_destroy_bitmap(my_al_struct->sprites.title_screen);
+    al_destroy_bitmap(my_al_struct->sprites.transparent_screen);
     al_destroy_bitmap(my_al_struct->sprites.stone_brick);
     al_destroy_bitmap(my_al_struct->sprites.deepslate_brick);
     al_destroy_bitmap(my_al_struct->sprites.dirt);
     al_destroy_bitmap(my_al_struct->sprites.boulder);
     al_destroy_bitmap(my_al_struct->sprites.gem);
     al_destroy_bitmap(my_al_struct->sprites.miner);
+    al_destroy_bitmap(my_al_struct->sprites.firefly);
     al_destroy_bitmap(my_al_struct->sprites.hatch);
     al_destroy_bitmap(my_al_struct->sprites.open_hatch);
     al_destroy_bitmap(my_al_struct->sprites.clock);
@@ -265,29 +275,30 @@ void sprites_deinit(MY_ALLEGRO_STRUCT* my_al_struct)
 void title_screen_draw(MY_ALLEGRO_STRUCT* my_al_struct)
 {
     al_draw_bitmap(my_al_struct->sprites.title_screen, 0, 0, 0);
-    al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, ((BUFFER_H/2) - 48), ALLEGRO_ALIGN_CENTRE, "Press [P] to play the game!");
-    al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, BUFFER_H/2, ALLEGRO_ALIGN_CENTRE, "Press [F] to Hall of Fame!");
-    al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, ((BUFFER_H/2) + 48), ALLEGRO_ALIGN_CENTRE, "Press [H] to see help!");
-    al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, ((BUFFER_H/2) + 96), ALLEGRO_ALIGN_CENTRE, "Press [Esc] to quit!");
+    al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, ((BUFFER_H/2) - 48), ALLEGRO_ALIGN_CENTRE, "[P]lay the game!");
+    al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, BUFFER_H/2, ALLEGRO_ALIGN_CENTRE, "Hall of [F]ame!");
+    al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, ((BUFFER_H/2) + 48), ALLEGRO_ALIGN_CENTRE, "[H]elp!");
+    al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, ((BUFFER_H/2) + 96), ALLEGRO_ALIGN_CENTRE, "[Esc] to quit!");
 }
 
 void hall_of_fame_draw(MY_ALLEGRO_STRUCT* my_al_struct, SCOREBOARD* sb)
 {
-    int sum = 48;
-
+    int sum = 64;
+    al_draw_bitmap(my_al_struct->sprites.transparent_screen, 0, 0, 0);
     al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, 0, ALLEGRO_ALIGN_CENTRE, "Welcome to the HALL OF FAME!");
     if(sb->sb_size > 0)
     {
-        for(int i = 0; i < sb->sb_size; i++)
+        for(int i = (sb->sb_size - 1); i >= 0 ; i--)
         {
-            al_draw_textf(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, sum, ALLEGRO_ALIGN_CENTRE, "[Position: %d] [Score: %ld]", (i + 1), sb->scores_array[i]);
-            sum += 48;
+            al_draw_textf(my_al_struct->font16, al_map_rgb(255, 255, 255), BUFFER_W/2, sum, ALLEGRO_ALIGN_CENTRE, "[Position: %d] [Score: %ld]", (sb->sb_size - i), sb->scores_array[i]);
+            sum += 24;
         }
+        al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, (BUFFER_H - 64), ALLEGRO_ALIGN_CENTRE, "Press [F] to return!");
     }
     else
     {
-        al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, sum, ALLEGRO_ALIGN_CENTRE, "There is nothing here!");
-        al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, sum + sum, ALLEGRO_ALIGN_CENTRE, "Play the game and then come back here!");
+        al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, 32, ALLEGRO_ALIGN_CENTRE, "There is nothing here!");
+        al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, 64, ALLEGRO_ALIGN_CENTRE, "Play the game and then come back here!");
     }
 }
 
@@ -325,6 +336,11 @@ void terrain_draw(GAME_MAP* map, MY_ALLEGRO_STRUCT* my_al_struct)
                 al_draw_bitmap(my_al_struct->sprites.boulder, (j * 16), ((i * 16) + 32), 0);
             if(map->map[i][j] == PLAYER)
                 al_draw_bitmap(my_al_struct->sprites.miner, (j * 16), ((i * 16) + 32), 0);
+            if((map->map[i][j] == FIREFLY_UP) || (map->map[i][j] == FIREFLY_MOVED_UP) 
+                || (map->map[i][j] == FIREFLY_LEFT) || (map->map[i][j] == FIREFLY_MOVED_LEFT) 
+                || (map->map[i][j] == FIREFLY_DOWN) || (map->map[i][j] == FIREFLY_MOVED_DOWN) 
+                || (map->map[i][j] == FIREFLY_RIGHT) || (map->map[i][j] == FIREFLY_MOVED_RIGHT))
+                al_draw_bitmap(my_al_struct->sprites.firefly, (j * 16), ((i * 16) + 32), 0);
             if(map->map[i][j] == HATCH)
                 al_draw_bitmap(my_al_struct->sprites.hatch, (j * 16), ((i * 16) + 32), 0);
             if(map->map[i][j] == OPEN_HATCH)

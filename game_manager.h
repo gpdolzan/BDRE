@@ -19,6 +19,7 @@
 #define CLOCK 11
 #define GOLD 12
 #define FALLING_GOLD 13
+
 #define FIREFLY_UP 14
 #define FIREFLY_RIGHT 15
 #define FIREFLY_DOWN 16
@@ -27,11 +28,14 @@
 #define BOULDER_MOVED 96
 #define GEM_MOVED 97
 #define GOLD_MOVED 98
-#define FIREFLY_MOVED 99
+#define FIREFLY_MOVED_UP 99
+#define FIREFLY_MOVED_RIGHT 100
+#define FIREFLY_MOVED_DOWN 101
+#define FIREFLY_MOVED_LEFT 102
 
-#define BOULDER_CRUSH 100
-#define GEM_CRUSH 101
-#define TIMER_RAN_OUT 102
+#define BOULDER_CRUSH 198
+#define GEM_CRUSH 199
+#define TIMER_RAN_OUT 200
 
 typedef struct STATUS_BOOLS
 {
@@ -100,5 +104,7 @@ void kill_player(GAME_MAP* map, int y, int x, MY_ALLEGRO_SAMPLES* samples);
 void check_roll_status(GAME_MAP* map, int x, int y);
 void update_roll(GAME_MAP* map, int x, int y, int object, int direction);
 void hud_timer_update(GAME_SCORE* score, STATUS_BOOLS* bools);
+int check_firefly_status(GAME_MAP* map, int x, int y);
+void update_firefly(GAME_MAP* map, int x, int y, int flag, STATUS_BOOLS* bools, MY_ALLEGRO_SAMPLES* samples);
 
 #endif

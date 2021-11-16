@@ -71,6 +71,24 @@ int main()
                 // Checks and updates game status every game tick (6 ticks every 1 second)
                 if(my_al_struct.event.timer.source == my_al_struct.timers.game_tick)
                 {
+
+                    if(game_bools.menu_is_open == false && game_bools.help_is_open == false && game_bools.fame_is_open == false && game_bools.map_is_loaded == true)
+                    {
+                        reset_movement(&game_map);
+                        terrain_update(&game_map, &game_bools, &(my_al_struct.samples));
+
+                        if(game_bools.player_is_dead == false)
+                        {
+                            player_update(&game_map, &player, &score, &game_bools, &my_al_struct);
+                        }
+
+                        if(game_bools.is_time_up == true && game_bools.player_is_dead == false)
+                        {
+                            game_bools.player_is_dead = true;
+                            kill_player(&game_map, player.y, player.x, &(my_al_struct.samples));
+                        }
+                    }
+
                     // Starts TIMELORD EASTER EGG
                     if(key[ALLEGRO_KEY_1] || input_cache.key_1 == true)
                     {
@@ -97,22 +115,6 @@ int main()
                         remove_rocks(&game_map);
                     }
 
-                    if(game_bools.menu_is_open == false && game_bools.help_is_open == false && game_bools.fame_is_open == false && game_bools.map_is_loaded == true)
-                    {
-                        reset_movement(&game_map);
-                        terrain_update(&game_map, &game_bools, &(my_al_struct.samples));
-
-                        if(game_bools.player_is_dead == false)
-                        {
-                            player_update(&game_map, &player, &score, &game_bools, &my_al_struct);
-                        }
-
-                        if(game_bools.is_time_up == true && game_bools.player_is_dead == false)
-                        {
-                            game_bools.player_is_dead = true;
-                            kill_player(&game_map, player.y, player.x, &(my_al_struct.samples));
-                        }
-                    }
                 }
 
                 if(my_al_struct.event.timer.source == my_al_struct.timers.fps)
@@ -134,18 +136,18 @@ int main()
                     }
 
                     // Open Hall of Fame Menu
-                    if(key[ALLEGRO_KEY_F] && game_bools.game_has_started == false)
+                    if(key[ALLEGRO_KEY_F])
                     {
+                        fetch_sb(&sb);
                         key[ALLEGRO_KEY_F] &= KEY_RELEASED;
                         if(game_bools.fame_is_open == false)
                         {
-                            game_bools.menu_is_open = false;
                             game_bools.fame_is_open = true;
                             play_click(&(my_al_struct.samples));
                         }
                         else
-                        {
-                            game_bools.menu_is_open = true;
+                        {   
+                            reset_input_cache();
                             game_bools.fame_is_open = false;
                             play_click(&(my_al_struct.samples));
                         }
@@ -169,7 +171,7 @@ int main()
                 // Ticks one second of the map timer if one second has elapsed
                 if(my_al_struct.event.timer.source == my_al_struct.timers.game_second)
                 {
-                    if(game_bools.player_is_dead == false && game_bools.menu_is_open == false && game_bools.timelord == false)
+                    if(game_bools.player_is_dead == false && game_bools.menu_is_open == false && game_bools.timelord == false && game_bools.fame_is_open == false && game_bools.help_is_open == false)
                         hud_timer_update(&score, &game_bools);
                 }
 
@@ -283,19 +285,20 @@ int main()
             display_pre_draw(&my_al_struct);
             al_clear_to_color(al_map_rgb(0,0,0));
 
-            // Draws main menu
-            if(game_bools.menu_is_open == true && game_bools.fame_is_open == false && game_bools.help_is_open == false)
-                title_screen_draw(&my_al_struct);
-
-            if(game_bools.fame_is_open == true)
-                hall_of_fame_draw(&my_al_struct, &sb);
-
             // Draws terrain (game map)
-            if(game_bools.menu_is_open == false && game_bools.fame_is_open == false && game_bools.help_is_open == false && game_bools.map_is_loaded == true)
+            if(game_bools.menu_is_open == false && game_bools.help_is_open == false && game_bools.map_is_loaded == true)
             {
                 terrain_draw(&game_map, &my_al_struct);
                 hud_draw(&my_al_struct, score.gems_collected, score.gems_needed, score.gems_total, score.timer, score.game_score);
             }
+
+            // Draws main menu
+            if(game_bools.menu_is_open == true && game_bools.game_has_started == false)
+                title_screen_draw(&my_al_struct);
+
+            // Draws Hall of fame
+            if(game_bools.fame_is_open == true)
+                hall_of_fame_draw(&my_al_struct, &sb);
 
             display_post_draw(&my_al_struct);
 
