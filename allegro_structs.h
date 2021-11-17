@@ -8,7 +8,7 @@
 #include <allegro5/allegro_acodec.h>
 #include <allegro5/allegro_image.h>
 
-#define EXPLOSION_FRAMES 54
+#define EXPLOSION_FRAMES 12
 
 typedef struct INPUT_CACHE
 {

@@ -10,6 +10,8 @@ int main()
     //Variables
     int current_level = 0;
     int persistent_score = 0;
+    int restart_timer = 3;
+    int persistent_rt = restart_timer;
     MAP_STORER map_storer;
     GAME_MAP game_map;
     GAME_SCORE score;
@@ -21,6 +23,10 @@ int main()
     map_storer = read_maps();
     //Allocate map wich will be used in-game
     game_map.map = map_alloc(map_storer.maps_width, map_storer.maps_height);
+    if(game_map.map == NULL)
+        perror("Insufficient Memory!");
+    load_map(&game_map, &map_storer, current_level);
+
     //Initialize game score
     init_score(&score, &map_storer);
     //Initialize game bools
@@ -76,6 +82,7 @@ int main()
                     {
                         reset_movement(&game_map);
                         terrain_update(&game_map, &game_bools, &(my_al_struct.samples));
+                        update_frames(&game_map);
 
                         if(game_bools.player_is_dead == false)
                         {
@@ -157,9 +164,12 @@ int main()
                     else if(key[ALLEGRO_KEY_ESCAPE])
                         game_bools.leave_game = true;
 
-                    // Restart game if R is pressed
-                    if((key[ALLEGRO_KEY_R] && game_bools.menu_is_open == false) || (input_cache.key_r == true && game_bools.menu_is_open == false))
+                    // Restart game if R is pressed or if player died
+                    if((key[ALLEGRO_KEY_R] && game_bools.menu_is_open == false) 
+                    || (input_cache.key_r == true && game_bools.menu_is_open == false) 
+                    || (game_bools.player_is_dead == true && restart_timer == 0))
                     {
+                        restart_timer = persistent_rt;
                         key[ALLEGRO_KEY_R] &= KEY_RELEASED;
                         reset_input_cache();
                         input_cache.key_r = false;
@@ -168,11 +178,15 @@ int main()
                     }
                 }
 
-                // Ticks one second of the map timer if one second has elapsed
                 if(my_al_struct.event.timer.source == my_al_struct.timers.game_second)
                 {
+                    // Ticks one second of the map timer if one second has elapsed
                     if(game_bools.player_is_dead == false && game_bools.menu_is_open == false && game_bools.timelord == false && game_bools.fame_is_open == false && game_bools.help_is_open == false)
                         hud_timer_update(&score, &game_bools);
+
+                    // Ticks restart timer if player is dead
+                    if(game_bools.player_is_dead == true)
+                        restart_timer--;
                 }
 
                 if(game_bools.restart_level == true)

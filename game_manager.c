@@ -507,6 +507,31 @@ void open_hatch(GAME_MAP* map, COORDINATES* hatch)
         return;
 }
 
+void update_frames(GAME_MAP* map)
+{
+    for(int i = 0; i < map->height; i++)
+    {
+        for(int j = 0; j < map->width; j++)
+        {
+            switch(map->map[i][j])
+            {
+                case P_EXPLOSION_0: map->map[i][j] += 2; break;
+                //case P_EXPLOSION_1: map->map[i][j]; break;
+                case P_EXPLOSION_2: map->map[i][j] += 2; break;
+                //case P_EXPLOSION_3: map->map[i][j]++; break;
+                case P_EXPLOSION_4: map->map[i][j] += 2; break;
+                //case P_EXPLOSION_5: map->map[i][j]++; break;
+                case P_EXPLOSION_6: map->map[i][j] += 2; break;
+                //case P_EXPLOSION_7: map->map[i][j]++; break;
+                case P_EXPLOSION_8: map->map[i][j] += 2; break;
+                //case P_EXPLOSION_9: map->map[i][j]++; break;
+                case P_EXPLOSION_10: map->map[i][j] = AIR; break;
+                //case P_EXPLOSION_11: map->map[i][j] = AIR; break;
+            }
+        }
+    }
+}
+
 void init_score(GAME_SCORE* score, MAP_STORER* ms)
 {
     score->gems_collected = 0;
@@ -643,7 +668,23 @@ void kill_player(GAME_MAP* map, int y, int x, MY_ALLEGRO_SAMPLES* samples)
         {
             if(map->map[i][j] != BOUNDS)
             {
-                map->map[i][j] = AIR;
+                map->map[i][j] = P_EXPLOSION_0;
+            }
+        }
+    }
+    return;
+}
+
+void kill_firefly(GAME_MAP* map, int y, int x, MY_ALLEGRO_SAMPLES* samples)
+{
+    play_explosion(samples);
+    for(int i = (y - 1); i <= (y + 1); i++)
+    {
+         for(int j = (x - 1); j <= (x + 1); j++)
+        {
+            if(map->map[i][j] != BOUNDS)
+            {
+                map->map[i][j] = E_EXPLOSION_0;
             }
         }
     }

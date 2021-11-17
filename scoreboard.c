@@ -10,7 +10,6 @@ void get_file(SCOREBOARD* sb)
 {
     if(check_file_existence() == false)
     {
-        printf("Created score file, because it couldn't be found!\n");
         create_file(sb);
         sb->sb_size = 0;
     }
@@ -79,7 +78,6 @@ void fetch_sb(SCOREBOARD* sb)
     if(check_file_existence() == false)
     {
         create_file(sb);
-        fprintf(stderr, "Just created file, there is nothing to be fetched, returning...\n");
         return;
     }
     else
@@ -90,7 +88,6 @@ void fetch_sb(SCOREBOARD* sb)
             allocate_scores(sb);
         else
         {
-            fprintf(stderr, "There is nothing to be fetched, returning...\n");
             return;
         }
 
@@ -133,7 +130,6 @@ void add_sb_score(SCOREBOARD* sb, long score)
 
     if(sb->sb_size <= 9)
         sb->sb_size = sb->sb_size + 1;
-    printf("%d\n", sb->sb_size);
     score_aux = (long*)malloc(sb->sb_size * sizeof(long));
     if(score_aux == NULL)
         perror("Insufficient memory:");

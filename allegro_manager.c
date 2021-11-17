@@ -232,21 +232,15 @@ void sprites_init(MY_ALLEGRO_STRUCT* my_al_struct)
     my_al_struct->sprites.explosion_sheet = al_load_bitmap("./resources/textures/explosion.png");
     init_check(my_al_struct->sprites.explosion_sheet, "explosion sheet sprite");
 
-    //int sprite_pos = 0;
-    //int x = 0;
-    //int y = 0;
+    int sprite_pos = 0;
+    int x = 0;
 
-    /*for(int i = 0; i < 5; i++)
+    for(int i = 0; i < EXPLOSION_FRAMES; i++)
     {
-        for(int j = 0; j < 9; j++)
-        {
-            my_al_struct->sprites.explosion[sprite_pos] = sprite_grab(my_al_struct, x, y, 16, 16);
-            sprite_pos++;
-            x += 16;
-        }
-        x = 0;
-        y += 16;
-    }*/
+        my_al_struct->sprites.explosion[sprite_pos] = sprite_grab(my_al_struct, x, 0, 16, 16);
+        sprite_pos++;
+        x += 16;
+    }
 
 }
 
@@ -265,10 +259,11 @@ void sprites_deinit(MY_ALLEGRO_STRUCT* my_al_struct)
     al_destroy_bitmap(my_al_struct->sprites.open_hatch);
     al_destroy_bitmap(my_al_struct->sprites.clock);
     al_destroy_bitmap(my_al_struct->sprites.gold);
-    al_destroy_bitmap(my_al_struct->sprites.explosion_sheet);
 
-    //for(int i = 0; i < 54; i++)
-       //al_destroy_bitmap(my_al_struct->sprites.explosion[i]);
+    for(int i = 0; i < EXPLOSION_FRAMES; i++)
+       al_destroy_bitmap(my_al_struct->sprites.explosion[i]);
+
+    al_destroy_bitmap(my_al_struct->sprites.explosion_sheet);
 }
 
 /* Draw */
@@ -316,23 +311,11 @@ void terrain_draw(GAME_MAP* map, MY_ALLEGRO_STRUCT* my_al_struct)
                 al_draw_bitmap(my_al_struct->sprites.dirt, (j * 16), ((i * 16) + 32), 0);
             if(map->map[i][j] == CLOCK)
                 al_draw_bitmap(my_al_struct->sprites.clock, (j * 16), ((i * 16) + 32), 0);
-            if(map->map[i][j] == GOLD)
+            if((map->map[i][j] == GOLD) || (map->map[i][j] == FALLING_GOLD) || (map->map[i][j] == GOLD_MOVED))
                 al_draw_bitmap(my_al_struct->sprites.gold, (j * 16), ((i * 16) + 32), 0);
-            if(map->map[i][j] == FALLING_GOLD)
-                al_draw_bitmap(my_al_struct->sprites.gold, (j * 16), ((i * 16) + 32), 0);
-            if(map->map[i][j] == GOLD_MOVED)
-                al_draw_bitmap(my_al_struct->sprites.gold, (j * 16), ((i * 16) + 32), 0);
-            if(map->map[i][j] == GEM)
+            if((map->map[i][j] == GEM) || (map->map[i][j] == FALLING_GEM) || (map->map[i][j] == GEM_MOVED))
                 al_draw_bitmap(my_al_struct->sprites.gem, (j * 16), ((i * 16) + 32), 0);
-            if(map->map[i][j] == FALLING_GEM)
-                al_draw_bitmap(my_al_struct->sprites.gem, (j * 16), ((i * 16) + 32), 0);
-            if(map->map[i][j] == GEM_MOVED)
-                al_draw_bitmap(my_al_struct->sprites.gem, (j * 16), ((i * 16) + 32), 0);
-            if(map->map[i][j] == BOULDER)
-                al_draw_bitmap(my_al_struct->sprites.boulder, (j * 16), ((i * 16) + 32), 0);
-            if(map->map[i][j] == FALLING_BOULDER)
-                al_draw_bitmap(my_al_struct->sprites.boulder, (j * 16), ((i * 16) + 32), 0);
-            if(map->map[i][j] == BOULDER_MOVED)
+            if((map->map[i][j] == BOULDER) || (map->map[i][j] == FALLING_BOULDER) || (map->map[i][j] == BOULDER_MOVED))
                 al_draw_bitmap(my_al_struct->sprites.boulder, (j * 16), ((i * 16) + 32), 0);
             if(map->map[i][j] == PLAYER)
                 al_draw_bitmap(my_al_struct->sprites.miner, (j * 16), ((i * 16) + 32), 0);
@@ -345,6 +328,23 @@ void terrain_draw(GAME_MAP* map, MY_ALLEGRO_STRUCT* my_al_struct)
                 al_draw_bitmap(my_al_struct->sprites.hatch, (j * 16), ((i * 16) + 32), 0);
             if(map->map[i][j] == OPEN_HATCH)
                 al_draw_bitmap(my_al_struct->sprites.open_hatch, (j * 16), ((i * 16) + 32), 0);
+            
+            switch(map->map[i][j])
+            {
+                case P_EXPLOSION_0: al_draw_bitmap(my_al_struct->sprites.explosion[0], (j * 16), ((i * 16) + 32), 0); break;
+                case P_EXPLOSION_1: al_draw_bitmap(my_al_struct->sprites.explosion[1], (j * 16), ((i * 16) + 32), 0); break;
+                case P_EXPLOSION_2: al_draw_bitmap(my_al_struct->sprites.explosion[2], (j * 16), ((i * 16) + 32), 0); break;
+                case P_EXPLOSION_3: al_draw_bitmap(my_al_struct->sprites.explosion[3], (j * 16), ((i * 16) + 32), 0); break;
+                case P_EXPLOSION_4: al_draw_bitmap(my_al_struct->sprites.explosion[4], (j * 16), ((i * 16) + 32), 0); break;
+                case P_EXPLOSION_5: al_draw_bitmap(my_al_struct->sprites.explosion[5], (j * 16), ((i * 16) + 32), 0); break;
+                case P_EXPLOSION_6: al_draw_bitmap(my_al_struct->sprites.explosion[6], (j * 16), ((i * 16) + 32), 0); break;
+                case P_EXPLOSION_7: al_draw_bitmap(my_al_struct->sprites.explosion[7], (j * 16), ((i * 16) + 32), 0); break;
+                case P_EXPLOSION_8: al_draw_bitmap(my_al_struct->sprites.explosion[8], (j * 16), ((i * 16) + 32), 0); break; 
+                case P_EXPLOSION_9: al_draw_bitmap(my_al_struct->sprites.explosion[9], (j * 16), ((i * 16) + 32), 0); break;
+                case P_EXPLOSION_10: al_draw_bitmap(my_al_struct->sprites.explosion[10], (j * 16), ((i * 16) + 32), 0); break;
+                case P_EXPLOSION_11: al_draw_bitmap(my_al_struct->sprites.explosion[11], (j * 16), ((i * 16) + 32), 0); break;
+            }
+
         }
     }
 }

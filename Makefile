@@ -18,16 +18,16 @@ boulderdash: $(objects)
 main.o: main.c
 	cc -c main.c $(CFLAGS)
 
-scoreboard.o: scoreboard.c
+scoreboard.o: scoreboard.c scoreboard.h
 	cc -c scoreboard.c $(CFLAGS)
 
-map_reader.o: map_reader.c
+map_reader.o: map_reader.c map_reader.h
 	cc -c map_reader.c $(CFLAGS)
 
-game_manager.o: game_manager.c
+game_manager.o: game_manager.c game_manager.h
 	cc -c game_manager.c $(CFLAGS)
 
-allegro_manager.o: allegro_manager.c
+allegro_manager.o: allegro_manager.c allegro_manager.h allegro_structs.h
 	cc -c allegro_manager.c $(CFLAGS)
 
 clean:
