@@ -63,8 +63,9 @@ void sprites_deinit(MY_ALLEGRO_STRUCT* my_al_struct);
 
 /* Draw */
 void terrain_draw(GAME_MAP* map, MY_ALLEGRO_STRUCT* my_al_struct);
-void hud_draw(MY_ALLEGRO_STRUCT* my_al_struct, int gems_collected, int gems_needed, int gems_total, long timer, long hud_score);
+void hud_draw(MY_ALLEGRO_STRUCT* my_al_struct, int gems_collected, int gems_needed, long timer, long hud_score);
 void title_screen_draw(MY_ALLEGRO_STRUCT* my_al_struct);
 void hall_of_fame_draw(MY_ALLEGRO_STRUCT* my_al_struct, SCOREBOARD* sb);
+void help_draw(MY_ALLEGRO_STRUCT* my_al_struct);
 
 #endif

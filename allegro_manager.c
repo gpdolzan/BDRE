@@ -27,7 +27,7 @@ void init_timers(MY_ALLEGRO_STRUCT* my_al_struct)
 {
     my_al_struct->timers.fps = al_create_timer(1.0/60.0);
     init_check(my_al_struct->timers.fps, "fps timer");
-    my_al_struct->timers.game_tick = al_create_timer(1.0/6.0);
+    my_al_struct->timers.game_tick = al_create_timer(1.0/7.0);
     init_check(my_al_struct->timers.game_tick, "game tick timer");
     my_al_struct->timers.game_second = al_create_timer(1.0);
     init_check(my_al_struct->timers.game_second, "game second timer");
@@ -239,7 +239,7 @@ void sprites_init(MY_ALLEGRO_STRUCT* my_al_struct)
     {
         my_al_struct->sprites.explosion[sprite_pos] = sprite_grab(my_al_struct, x, 0, 16, 16);
         sprite_pos++;
-        x += 16;
+        x += 32;
     }
 
 }
@@ -273,7 +273,7 @@ void title_screen_draw(MY_ALLEGRO_STRUCT* my_al_struct)
     al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, ((BUFFER_H/2) - 48), ALLEGRO_ALIGN_CENTRE, "[P]lay the game!");
     al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, BUFFER_H/2, ALLEGRO_ALIGN_CENTRE, "Hall of [F]ame!");
     al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, ((BUFFER_H/2) + 48), ALLEGRO_ALIGN_CENTRE, "[H]elp!");
-    al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, ((BUFFER_H/2) + 96), ALLEGRO_ALIGN_CENTRE, "[Esc] to quit!");
+    al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, ((BUFFER_H/2) + 96), ALLEGRO_ALIGN_CENTRE, "[ESC] to quit!");
 }
 
 void hall_of_fame_draw(MY_ALLEGRO_STRUCT* my_al_struct, SCOREBOARD* sb)
@@ -288,13 +288,37 @@ void hall_of_fame_draw(MY_ALLEGRO_STRUCT* my_al_struct, SCOREBOARD* sb)
             al_draw_textf(my_al_struct->font16, al_map_rgb(255, 255, 255), BUFFER_W/2, sum, ALLEGRO_ALIGN_CENTRE, "[Position: %d] [Score: %ld]", (sb->sb_size - i), sb->scores_array[i]);
             sum += 24;
         }
-        al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, (BUFFER_H - 64), ALLEGRO_ALIGN_CENTRE, "Press [F] to return!");
+        al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, (BUFFER_H - 64), ALLEGRO_ALIGN_CENTRE, "Press [ESC] to return!");
     }
     else
     {
         al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, 32, ALLEGRO_ALIGN_CENTRE, "There is nothing here!");
         al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, 64, ALLEGRO_ALIGN_CENTRE, "Play the game and then come back here!");
+        al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, (BUFFER_H - 64), ALLEGRO_ALIGN_CENTRE, "Press [ESC] to return!");
     }
+}
+
+void help_draw(MY_ALLEGRO_STRUCT* my_al_struct)
+{
+    al_draw_bitmap(my_al_struct->sprites.transparent_screen, 0, 0, 0);
+    al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, 0, ALLEGRO_ALIGN_CENTRE, "Welcome to the HELP MENU");
+
+    // Instructions
+    al_draw_text(my_al_struct->font16, al_map_rgb(255, 255, 255), BUFFER_W/2, 64, ALLEGRO_ALIGN_CENTRE, "Use the arrow keys [up, down, left, right] to move the player: ");
+    al_draw_bitmap(my_al_struct->sprites.miner, 535, 64, 0);
+
+    al_draw_text(my_al_struct->font16, al_map_rgb(255, 255, 255), BUFFER_W/2, 80, ALLEGRO_ALIGN_CENTRE, "Collect all the needed gems:      , this will open the hatch        ->        ");
+    al_draw_bitmap(my_al_struct->sprites.gem, 295, 84, 0);
+    al_draw_bitmap(my_al_struct->sprites.hatch, 490, 84, 0);
+    al_draw_bitmap(my_al_struct->sprites.open_hatch, 528, 84, 0);
+
+    al_draw_text(my_al_struct->font16, al_map_rgb(255, 255, 255), BUFFER_W/2, 112, ALLEGRO_ALIGN_CENTRE, "By collecting gems and other items, you'll get a score!");
+    al_draw_text(my_al_struct->font16, al_map_rgb(255, 255, 255), BUFFER_W/2, 128, ALLEGRO_ALIGN_CENTRE, "This score will be saved in the hall of fame [F]");
+
+    al_draw_text(my_al_struct->font16, al_map_rgb(255, 255, 255), BUFFER_W/2, 160, ALLEGRO_ALIGN_CENTRE, "You can also collect clocks:      , they extend your level timer duration");
+    al_draw_bitmap(my_al_struct->sprites.clock, 277, 164, 0);
+
+    al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, (BUFFER_H - 64), ALLEGRO_ALIGN_CENTRE, "Press [ESC] to return!");
 }
 
 void terrain_draw(GAME_MAP* map, MY_ALLEGRO_STRUCT* my_al_struct)
@@ -303,55 +327,84 @@ void terrain_draw(GAME_MAP* map, MY_ALLEGRO_STRUCT* my_al_struct)
     {
         for(int j = 0; j < map->width; j++)
         {
-            if(map->map[i][j] == BOUNDS)
-                al_draw_bitmap(my_al_struct->sprites.deepslate_brick, (j * 16), ((i * 16) + 32), 0);
-            if(map->map[i][j] == BRICK)
-                al_draw_bitmap(my_al_struct->sprites.stone_brick, (j * 16), ((i * 16) + 32), 0);
-            if(map->map[i][j] == DIRT)
-                al_draw_bitmap(my_al_struct->sprites.dirt, (j * 16), ((i * 16) + 32), 0);
-            if(map->map[i][j] == CLOCK)
-                al_draw_bitmap(my_al_struct->sprites.clock, (j * 16), ((i * 16) + 32), 0);
-            if((map->map[i][j] == GOLD) || (map->map[i][j] == FALLING_GOLD) || (map->map[i][j] == GOLD_MOVED))
-                al_draw_bitmap(my_al_struct->sprites.gold, (j * 16), ((i * 16) + 32), 0);
-            if((map->map[i][j] == GEM) || (map->map[i][j] == FALLING_GEM) || (map->map[i][j] == GEM_MOVED))
-                al_draw_bitmap(my_al_struct->sprites.gem, (j * 16), ((i * 16) + 32), 0);
-            if((map->map[i][j] == BOULDER) || (map->map[i][j] == FALLING_BOULDER) || (map->map[i][j] == BOULDER_MOVED))
-                al_draw_bitmap(my_al_struct->sprites.boulder, (j * 16), ((i * 16) + 32), 0);
-            if(map->map[i][j] == PLAYER)
-                al_draw_bitmap(my_al_struct->sprites.miner, (j * 16), ((i * 16) + 32), 0);
-            if((map->map[i][j] == FIREFLY_UP) || (map->map[i][j] == FIREFLY_MOVED_UP) 
-                || (map->map[i][j] == FIREFLY_LEFT) || (map->map[i][j] == FIREFLY_MOVED_LEFT) 
-                || (map->map[i][j] == FIREFLY_DOWN) || (map->map[i][j] == FIREFLY_MOVED_DOWN) 
-                || (map->map[i][j] == FIREFLY_RIGHT) || (map->map[i][j] == FIREFLY_MOVED_RIGHT))
-                al_draw_bitmap(my_al_struct->sprites.firefly, (j * 16), ((i * 16) + 32), 0);
-            if(map->map[i][j] == HATCH)
-                al_draw_bitmap(my_al_struct->sprites.hatch, (j * 16), ((i * 16) + 32), 0);
-            if(map->map[i][j] == OPEN_HATCH)
-                al_draw_bitmap(my_al_struct->sprites.open_hatch, (j * 16), ((i * 16) + 32), 0);
-            
+            // Draws terrain objects
             switch(map->map[i][j])
             {
-                case P_EXPLOSION_0: al_draw_bitmap(my_al_struct->sprites.explosion[0], (j * 16), ((i * 16) + 32), 0); break;
-                case P_EXPLOSION_1: al_draw_bitmap(my_al_struct->sprites.explosion[1], (j * 16), ((i * 16) + 32), 0); break;
-                case P_EXPLOSION_2: al_draw_bitmap(my_al_struct->sprites.explosion[2], (j * 16), ((i * 16) + 32), 0); break;
-                case P_EXPLOSION_3: al_draw_bitmap(my_al_struct->sprites.explosion[3], (j * 16), ((i * 16) + 32), 0); break;
-                case P_EXPLOSION_4: al_draw_bitmap(my_al_struct->sprites.explosion[4], (j * 16), ((i * 16) + 32), 0); break;
-                case P_EXPLOSION_5: al_draw_bitmap(my_al_struct->sprites.explosion[5], (j * 16), ((i * 16) + 32), 0); break;
-                case P_EXPLOSION_6: al_draw_bitmap(my_al_struct->sprites.explosion[6], (j * 16), ((i * 16) + 32), 0); break;
-                case P_EXPLOSION_7: al_draw_bitmap(my_al_struct->sprites.explosion[7], (j * 16), ((i * 16) + 32), 0); break;
-                case P_EXPLOSION_8: al_draw_bitmap(my_al_struct->sprites.explosion[8], (j * 16), ((i * 16) + 32), 0); break; 
-                case P_EXPLOSION_9: al_draw_bitmap(my_al_struct->sprites.explosion[9], (j * 16), ((i * 16) + 32), 0); break;
-                case P_EXPLOSION_10: al_draw_bitmap(my_al_struct->sprites.explosion[10], (j * 16), ((i * 16) + 32), 0); break;
-                case P_EXPLOSION_11: al_draw_bitmap(my_al_struct->sprites.explosion[11], (j * 16), ((i * 16) + 32), 0); break;
+                // Immovable objects
+                case AIR: break;
+                case DIRT: al_draw_bitmap(my_al_struct->sprites.dirt, (j * 16), ((i * 16) + 32), 0); break;
+                case BRICK: al_draw_bitmap(my_al_struct->sprites.stone_brick, (j * 16), ((i * 16) + 32), 0); break;
+                case BOUNDS: al_draw_bitmap(my_al_struct->sprites.deepslate_brick, (j * 16), ((i * 16) + 32), 0); break;
+                case CLOCK: al_draw_bitmap(my_al_struct->sprites.clock, (j * 16), ((i * 16) + 32), 0); break;
+                case HATCH: al_draw_bitmap(my_al_struct->sprites.hatch, (j * 16), ((i * 16) + 32), 0); break;
+                case OPEN_HATCH: al_draw_bitmap(my_al_struct->sprites.open_hatch, (j * 16), ((i * 16) + 32), 0); break;
+
+                // Movable objects
+                case BOULDER:
+                case FALLING_BOULDER:
+                case BOULDER_MOVED:
+                    al_draw_bitmap(my_al_struct->sprites.boulder, (j * 16), ((i * 16) + 32), 0);
+                    break;
+                case GEM:
+                case FALLING_GEM:
+                case GEM_MOVED:
+                    al_draw_bitmap(my_al_struct->sprites.gem, (j * 16), ((i * 16) + 32), 0);
+                    break;
+                case GOLD:
+                case FALLING_GOLD:
+                case GOLD_MOVED:
+                    al_draw_bitmap(my_al_struct->sprites.gold, (j * 16), ((i * 16) + 32), 0);
+                    break;
+
+                // Player
+                case PLAYER: al_draw_bitmap(my_al_struct->sprites.miner, (j * 16), ((i * 16) + 32), 0); break;
+
+                // Enemy
+                case FIREFLY_UP:
+                case FIREFLY_LEFT:
+                case FIREFLY_DOWN:
+                case FIREFLY_RIGHT:
+                case FIREFLY_MOVED_UP:
+                case FIREFLY_MOVED_LEFT:
+                case FIREFLY_MOVED_DOWN:
+                case FIREFLY_MOVED_RIGHT:
+                    al_draw_bitmap(my_al_struct->sprites.firefly, (j * 16), ((i * 16) + 32), 0); 
+                    break;
+
+                // Explosion Frames
+                case P_EXPLOSION_0:
+                case E_EXPLOSION_0:
+                    al_draw_bitmap(my_al_struct->sprites.explosion[0], (j * 16), ((i * 16) + 32), 0); 
+                    break;
+                case P_EXPLOSION_1:
+                case E_EXPLOSION_1: 
+                    al_draw_bitmap(my_al_struct->sprites.explosion[1], (j * 16), ((i * 16) + 32), 0); 
+                    break;
+                case P_EXPLOSION_2: 
+                case E_EXPLOSION_2: 
+                    al_draw_bitmap(my_al_struct->sprites.explosion[2], (j * 16), ((i * 16) + 32), 0); 
+                    break;
+                case P_EXPLOSION_3:
+                case E_EXPLOSION_3: 
+                    al_draw_bitmap(my_al_struct->sprites.explosion[3], (j * 16), ((i * 16) + 32), 0); 
+                    break;
+                case P_EXPLOSION_4:
+                case E_EXPLOSION_4: 
+                    al_draw_bitmap(my_al_struct->sprites.explosion[4], (j * 16), ((i * 16) + 32), 0); 
+                    break;
+                case P_EXPLOSION_5:
+                case E_EXPLOSION_5: 
+                    al_draw_bitmap(my_al_struct->sprites.explosion[5], (j * 16), ((i * 16) + 32), 0); 
+                    break;
             }
 
         }
     }
 }
 
-void hud_draw(MY_ALLEGRO_STRUCT* my_al_struct, int gems_collected, int gems_needed, int gems_total, long timer, long hud_score)
+void hud_draw(MY_ALLEGRO_STRUCT* my_al_struct, int gems_collected, int gems_needed, long timer, long hud_score)
 {
-    al_draw_textf(my_al_struct->font, al_map_rgb(255, 255, 255), 16, 0, 0, "%02d/%02d - %02d", gems_collected, gems_total, gems_needed);
+    al_draw_textf(my_al_struct->font, al_map_rgb(255, 255, 255), 16, 0, 0, "%02d/%02d", gems_collected, gems_needed);
     al_draw_textf(my_al_struct->font, al_map_rgb(255, 255, 255), 640/2, 0, ALLEGRO_ALIGN_CENTRE, "%03ld", timer);
     al_draw_textf(my_al_struct->font, al_map_rgb(255, 255, 255), 640-16, 0, ALLEGRO_ALIGN_RIGHT, "%06ld", hud_score);
 }

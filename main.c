@@ -77,7 +77,7 @@ int main()
                 // Checks and updates game status every game tick (6 ticks every 1 second)
                 if(my_al_struct.event.timer.source == my_al_struct.timers.game_tick)
                 {
-
+                    // Maps are being played
                     if(game_bools.menu_is_open == false && game_bools.help_is_open == false && game_bools.fame_is_open == false && game_bools.map_is_loaded == true)
                     {
                         reset_movement(&game_map);
@@ -85,9 +85,7 @@ int main()
                         update_frames(&game_map);
 
                         if(game_bools.player_is_dead == false)
-                        {
                             player_update(&game_map, &player, &score, &game_bools, &my_al_struct);
-                        }
 
                         if(game_bools.is_time_up == true && game_bools.player_is_dead == false)
                         {
@@ -124,60 +122,70 @@ int main()
 
                 }
 
+                // Draws everything on screen
                 if(my_al_struct.event.timer.source == my_al_struct.timers.fps)
                 {
                     // Start game map - Play game
-                    if(key[ALLEGRO_KEY_P] && game_bools.game_has_started == false)
+                    if(key[ALLEGRO_KEY_P] && game_bools.game_has_started == false && game_bools.help_is_open == false && game_bools.fame_is_open == false)
                     {
-                        key[ALLEGRO_KEY_P] &= KEY_RELEASED;
-                        reset_input_cache();
-                        game_bools.menu_is_open = false;
-                        game_bools.game_has_started = true;
-                        game_bools.is_time_up = false;
-                        game_bools.roxploder = false;
-                        game_bools.timelord = false;
-                        game_bools.midas = false;
-                        game_bools.hatch_is_open = false;
-                        game_bools.player_is_dead = false;
-                        play_click(&(my_al_struct.samples));
+                        if(game_bools.game_has_started == false && game_bools.help_is_open == false && game_bools.fame_is_open == false)
+                            start_level(&map_storer, &game_map, &game_bools, &(my_al_struct.samples), current_level);
                     }
+                    
 
                     // Open Hall of Fame Menu
                     if(key[ALLEGRO_KEY_F])
+                        open_fame_menu(&sb, &game_bools, &(my_al_struct.samples));
+
+                    // Open Help Menu
+                    if(key[ALLEGRO_KEY_H] || key[ALLEGRO_KEY_F1])
+                        open_help_menu(&game_bools, &(my_al_struct.samples));
+
+                    if(key[ALLEGRO_KEY_ESCAPE])
                     {
-                        fetch_sb(&sb);
-                        key[ALLEGRO_KEY_F] &= KEY_RELEASED;
-                        if(game_bools.fame_is_open == false)
-                        {
-                            game_bools.fame_is_open = true;
-                            play_click(&(my_al_struct.samples));
-                        }
-                        else
-                        {   
-                            reset_input_cache();
+                        play_click(&(my_al_struct.samples));
+                        key[ALLEGRO_KEY_ESCAPE] &= KEY_RELEASED;
+                        if(game_bools.help_is_open == true)
+                            game_bools.help_is_open = false;
+                        else if(game_bools.fame_is_open == true)
                             game_bools.fame_is_open = false;
-                            play_click(&(my_al_struct.samples));
+                        else if(game_bools.menu_is_open == false && game_bools. help_is_open == false && game_bools.fame_is_open == false)
+                        {
+                            key[ALLEGRO_KEY_ESCAPE] &= KEY_RELEASED;
+                            reset_input_cache();
+
+                            persistent_score = 0;
+                            current_level = 0;
+                            init_score(&score, &map_storer);
+                            game_bools.timelord = false;
+                            game_bools.menu_is_open = true;
+                            game_bools.game_has_started = false;
+                            game_bools.is_time_up = false;
+                            game_bools.roxploder = false;
+                            game_bools.midas = false;
+                            game_bools.game_win = false;
+                            game_bools.level_win = false;
+                            game_bools.map_is_loaded = true;
+                            load_map(&game_map, &map_storer, current_level);
+                            init_player(&game_map, &player);   
                         }
+                        else if(game_bools.menu_is_open == true && game_bools.fame_is_open == false && game_bools.help_is_open == false)
+                            game_bools.leave_game = true;
                     }
 
-                    // Closes game
-                    else if(key[ALLEGRO_KEY_ESCAPE])
-                        game_bools.leave_game = true;
-
                     // Restart game if R is pressed or if player died
-                    if((key[ALLEGRO_KEY_R] && game_bools.menu_is_open == false) 
-                    || (input_cache.key_r == true && game_bools.menu_is_open == false) 
-                    || (game_bools.player_is_dead == true && restart_timer == 0))
+                    if((key[ALLEGRO_KEY_R] && game_bools.menu_is_open == false) || (input_cache.key_r == true && game_bools.menu_is_open == false) || (game_bools.player_is_dead == true && restart_timer == 0))
                     {
-                        restart_timer = persistent_rt;
                         key[ALLEGRO_KEY_R] &= KEY_RELEASED;
                         reset_input_cache();
+                        restart_timer = persistent_rt;
                         input_cache.key_r = false;
                         game_bools.restart_level = true;
                         play_click(&(my_al_struct.samples));
                     }
                 }
 
+                // Ticks every second, used to check if timers have ran out
                 if(my_al_struct.event.timer.source == my_al_struct.timers.game_second)
                 {
                     // Ticks one second of the map timer if one second has elapsed
@@ -189,6 +197,7 @@ int main()
                         restart_timer--;
                 }
 
+                // If level will be restarted
                 if(game_bools.restart_level == true)
                 {
                     game_bools.restart_level = false;
@@ -205,14 +214,14 @@ int main()
                     init_player(&game_map, &player);
                 }
 
-                // Tests if map rotation had ended
+                // Tests if map rotation has ended
                 if(game_bools.level_win == true)
                 {
                     // Map rotation ended, return to main menu
                     if(current_level == (map_storer.number_of_maps - 1))
                     {
                         // Game is finished
-                        // Add and write to the scoreboardfile
+                        // Add and write to the scoreboard file
                         routine_add(&sb, score.game_score);
                         write_to_file(&sb);
                         game_bools.game_win = true;
@@ -290,7 +299,6 @@ int main()
             // Loaded stats into score tracker
             score.gems_needed = game_map.gems_needed;
             score.timer = game_map.map_timer;
-            score.gems_total = game_map.gems_total;
         }
 
         // Draws screen based on what bools are true
@@ -300,10 +308,10 @@ int main()
             al_clear_to_color(al_map_rgb(0,0,0));
 
             // Draws terrain (game map)
-            if(game_bools.menu_is_open == false && game_bools.help_is_open == false && game_bools.map_is_loaded == true)
+            if(game_bools.menu_is_open == false && game_bools.map_is_loaded == true)
             {
                 terrain_draw(&game_map, &my_al_struct);
-                hud_draw(&my_al_struct, score.gems_collected, score.gems_needed, score.gems_total, score.timer, score.game_score);
+                hud_draw(&my_al_struct, score.gems_collected, score.gems_needed, score.timer, score.game_score);
             }
 
             // Draws main menu
@@ -313,6 +321,10 @@ int main()
             // Draws Hall of fame
             if(game_bools.fame_is_open == true)
                 hall_of_fame_draw(&my_al_struct, &sb);
+
+            // Draws Help
+            if(game_bools.help_is_open == true)
+                help_draw(&my_al_struct);
 
             display_post_draw(&my_al_struct);
 

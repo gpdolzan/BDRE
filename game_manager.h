@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include "allegro_manager.h"
+#include "scoreboard.h"
 #include "map_reader.h"
 
 #define AIR 0
@@ -32,26 +33,14 @@
 #define P_EXPLOSION_3   21
 #define P_EXPLOSION_4   22
 #define P_EXPLOSION_5   23
-#define P_EXPLOSION_6   24
-#define P_EXPLOSION_7   25
-#define P_EXPLOSION_8   26
-#define P_EXPLOSION_9   27
-#define P_EXPLOSION_10  28
-#define P_EXPLOSION_11  29
 
 // Enemy Explosion
-#define E_EXPLOSION_0   30
-#define E_EXPLOSION_1   31
-#define E_EXPLOSION_2   32
-#define E_EXPLOSION_3   33
-#define E_EXPLOSION_4   34
-#define E_EXPLOSION_5   35
-#define E_EXPLOSION_6   36
-#define E_EXPLOSION_7   37
-#define E_EXPLOSION_8   38
-#define E_EXPLOSION_9   39
-#define E_EXPLOSION_10  40
-#define E_EXPLOSION_11  41
+#define E_EXPLOSION_0   24
+#define E_EXPLOSION_1   25
+#define E_EXPLOSION_2   26
+#define E_EXPLOSION_3   27
+#define E_EXPLOSION_4   28
+#define E_EXPLOSION_5   29
 
 #define BOULDER_MOVED 96
 #define GEM_MOVED 97
@@ -104,7 +93,6 @@ typedef struct GAME_SCORE
 {
     int gems_collected;
     int gems_needed;
-    int gems_total;
     long timer;
     long game_score;
     
@@ -114,9 +102,16 @@ void initialize_bools(STATUS_BOOLS* bools);
 void terrain_update(GAME_MAP* map, STATUS_BOOLS* bools, MY_ALLEGRO_SAMPLES* samples);
 void remove_rocks(GAME_MAP* map);
 void goldify_rocks(GAME_MAP* map);
+
+void check_ff_move_up(GAME_MAP* map, int j, int i);
+void check_ff_move_left(GAME_MAP* map, int j, int i);
+void check_ff_move_down(GAME_MAP* map, int j, int i);
+void check_ff_move_right(GAME_MAP* map, int j, int i);
+
 int check_fall_status(GAME_MAP* map, int x, int y);
 void update_fall(GAME_MAP* map, int x, int y, int fall_status, STATUS_BOOLS* bools, MY_ALLEGRO_SAMPLES* samples);
 void update_frames(GAME_MAP* map);
+bool is_firefly(GAME_MAP* map, int x, int y);
 void reset_movement(GAME_MAP* map);
 void init_player(GAME_MAP* map, COORDINATES* player);
 void init_hatch(GAME_MAP* map, COORDINATES* hatch);
@@ -136,5 +131,8 @@ void update_roll(GAME_MAP* map, int x, int y, int object, int direction);
 void hud_timer_update(GAME_SCORE* score, STATUS_BOOLS* bools);
 int check_firefly_status(GAME_MAP* map, int x, int y);
 void update_firefly(GAME_MAP* map, int x, int y, int flag, STATUS_BOOLS* bools, MY_ALLEGRO_SAMPLES* samples);
+void start_level(MAP_STORER* ms, GAME_MAP* map, STATUS_BOOLS* bools, MY_ALLEGRO_SAMPLES* samples, int current_level);
+void open_fame_menu(SCOREBOARD* sb, STATUS_BOOLS* bools, MY_ALLEGRO_SAMPLES* samples);
+void open_help_menu(STATUS_BOOLS* bools, MY_ALLEGRO_SAMPLES* samples);
 
 #endif

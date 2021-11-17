@@ -27,10 +27,9 @@ MAP_STORER read_maps()
     {
         fscanf
         (
-        map_file, "%d %d %d", 
+        map_file, "%d %d", 
         &(ms.game_map_array[k].map_timer),
-        &(ms.game_map_array[k].gems_needed),
-        &(ms.game_map_array[k].gems_total)
+        &(ms.game_map_array[k].gems_needed)
         );
         ms.game_map_array[k].width = ms.maps_width;
         ms.game_map_array[k].height = ms.maps_height;
@@ -97,7 +96,6 @@ void load_map(GAME_MAP* map, MAP_STORER* ms, int map_number)
     map->height = ms->maps_height;
     map->map_timer = ms->game_map_array[map_number].map_timer;
     map->gems_needed = ms->game_map_array[map_number].gems_needed;
-    map->gems_total = ms->game_map_array[map_number].gems_total;
     for(int i = 0; i < ms->maps_height; i++)
         for(int j = 0; j < ms->maps_width; j++)
             map->map[i][j] = ms->game_map_array[map_number].map[i][j];
