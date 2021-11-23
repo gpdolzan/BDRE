@@ -156,6 +156,8 @@ void audio_init(MY_ALLEGRO_SAMPLES* samples)
     init_check(samples->sample_explosion, "audio sample explosion");
     samples->sample_hatch_open = al_load_sample("./resources/SFX/hatch_open.ogg");
     init_check(samples->sample_hatch_open, "audio sample hatch open");
+    samples->sample_win = al_load_sample("./resources/SFX/level_win.ogg");
+    init_check(samples->sample_win, "audio sample level win");
 }
 
 void play_click(MY_ALLEGRO_SAMPLES* samples)
@@ -178,12 +180,18 @@ void play_hatch_open(MY_ALLEGRO_SAMPLES* samples)
     al_play_sample(samples->sample_hatch_open, 0.9, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
 }
 
+void play_win(MY_ALLEGRO_SAMPLES* samples)
+{
+    al_play_sample(samples->sample_win, 0.75, 0, 1, ALLEGRO_PLAYMODE_ONCE, NULL);
+}
+
 void audio_deinit(MY_ALLEGRO_SAMPLES* samples)
 {
     al_destroy_sample(samples->sample_click);
     al_destroy_sample(samples->sample_gem_collect);
     al_destroy_sample(samples->sample_explosion);
     al_destroy_sample(samples->sample_hatch_open);
+    al_destroy_sample(samples->sample_win);
 }
 
 

@@ -49,12 +49,11 @@ typedef struct MY_ALLEGRO_SPRITES
 
 typedef struct MY_ALLEGRO_SAMPLES
 {
-    //ALLEGRO_SAMPLE* sample_stone_roll[3];
     ALLEGRO_SAMPLE* sample_click;
     ALLEGRO_SAMPLE* sample_gem_collect;
     ALLEGRO_SAMPLE* sample_hatch_open;
     ALLEGRO_SAMPLE* sample_explosion;
-    //ALLEGRO_SAMPLE* sample_win;
+    ALLEGRO_SAMPLE* sample_win;
 
 }MY_ALLEGRO_SAMPLES;
 

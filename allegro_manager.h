@@ -54,6 +54,7 @@ void play_click(MY_ALLEGRO_SAMPLES* samples);
 void play_gem_collect(MY_ALLEGRO_SAMPLES* samples);
 void play_explosion(MY_ALLEGRO_SAMPLES* samples);
 void play_hatch_open(MY_ALLEGRO_SAMPLES* samples);
+void play_win(MY_ALLEGRO_SAMPLES* samples);
 void audio_deinit(MY_ALLEGRO_SAMPLES* samples);
 
 /* Sprites */

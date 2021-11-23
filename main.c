@@ -145,6 +145,7 @@ int main()
                     {
                         play_click(&(my_al_struct.samples));
                         key[ALLEGRO_KEY_ESCAPE] &= KEY_RELEASED;
+                        reset_input_cache();
                         if(game_bools.help_is_open == true)
                             game_bools.help_is_open = false;
                         else if(game_bools.fame_is_open == true)
@@ -217,6 +218,7 @@ int main()
                 // Tests if map rotation has ended
                 if(game_bools.level_win == true)
                 {
+                    play_win(&(my_al_struct.samples));
                     // Map rotation ended, return to main menu
                     if(current_level == (map_storer.number_of_maps - 1))
                     {
