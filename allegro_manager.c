@@ -326,6 +326,10 @@ void help_draw(MY_ALLEGRO_STRUCT* my_al_struct)
     al_draw_text(my_al_struct->font16, al_map_rgb(255, 255, 255), BUFFER_W/2, 160, ALLEGRO_ALIGN_CENTRE, "You can also collect clocks:      , they extend your level timer duration");
     al_draw_bitmap(my_al_struct->sprites.clock, 277, 164, 0);
 
+    al_draw_text(my_al_struct->font16, al_map_rgb(255, 255, 255), BUFFER_W/2, 192, ALLEGRO_ALIGN_CENTRE, "Use the keys [1, 2, 3] to activate hidden easter eggs while playing");
+    al_draw_text(my_al_struct->font16, al_map_rgb(255, 255, 255), BUFFER_W/2, 224, ALLEGRO_ALIGN_CENTRE, "Thanks for reading, and have fun playing!");
+    al_draw_text(my_al_struct->font16, al_map_rgb(255, 255, 255), BUFFER_W/2, 256, ALLEGRO_ALIGN_CENTRE, "Game made by: Gabriel Pimentel Dolzan");
+
     al_draw_text(my_al_struct->font, al_map_rgb(255, 255, 255), BUFFER_W/2, (BUFFER_H - 64), ALLEGRO_ALIGN_CENTRE, "Press [ESC] to return!");
 }
 

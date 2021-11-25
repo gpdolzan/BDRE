@@ -473,7 +473,7 @@ void update_fall(GAME_MAP* map, int x, int y, int fall_status, STATUS_BOOLS* boo
     else if(fall_status == 2)
     {
         if(map->map[y + 1][x] != PLAYER)
-            kill_firefly(map, y + 1, x, samples);
+            kill_firefly(map, y + 1, x, samples, bools);
         else
         {
             bools->player_is_dead = true;
@@ -492,7 +492,7 @@ void update_fall(GAME_MAP* map, int x, int y, int fall_status, STATUS_BOOLS* boo
     else if(fall_status == 5)
     {
         if(map->map[y + 1][x] != PLAYER)
-            kill_firefly(map, y + 1, x, samples);
+            kill_firefly(map, y + 1, x, samples, bools);
         else
         {
             bools->player_is_dead = true;
@@ -511,7 +511,7 @@ void update_fall(GAME_MAP* map, int x, int y, int fall_status, STATUS_BOOLS* boo
     else if(fall_status == 8)
     {
         if(map->map[y + 1][x] != PLAYER)
-            kill_firefly(map, y + 1, x, samples);
+            kill_firefly(map, y + 1, x, samples, bools);
         else
         {
             bools->player_is_dead = true;
@@ -690,6 +690,7 @@ void check_move(GAME_MAP* map, COORDINATES* player, int x, int y, GAME_SCORE* sc
     if(map->map[player->y + y][player->x + x] == OPEN_HATCH)
     {
         bools->level_win = true;
+        add_score(score, OPEN_HATCH, my_al_struct);
         return;
     }
     return;
@@ -729,11 +730,17 @@ void add_score(GAME_SCORE* score, int flag, MY_ALLEGRO_STRUCT* my_al_struct)
     }
     if(flag == CLOCK)
     {
-        score->timer += 20;
+        play_gem_collect(&(my_al_struct->samples));
+        score->timer += 5;
     }
     if(flag == GOLD)
     {
+        play_gem_collect(&(my_al_struct->samples));
         score->game_score += 200;
+    }
+    if(flag == OPEN_HATCH)
+    {
+        score->game_score += (score->timer * 3);
     }
 }
 
@@ -755,7 +762,7 @@ void kill_player(GAME_MAP* map, int y, int x, MY_ALLEGRO_SAMPLES* samples)
 }
 
 // Kills firefly, starts enemy explosion animation
-void kill_firefly(GAME_MAP* map, int y, int x, MY_ALLEGRO_SAMPLES* samples)
+void kill_firefly(GAME_MAP* map, int y, int x, MY_ALLEGRO_SAMPLES* samples, STATUS_BOOLS* bools)
 {
     play_explosion(samples);
     for(int i = (y - 1); i <= (y + 1); i++)
@@ -764,6 +771,8 @@ void kill_firefly(GAME_MAP* map, int y, int x, MY_ALLEGRO_SAMPLES* samples)
         {
             if(map->map[i][j] != BOUNDS)
             {
+                if(map->map[i][j] == PLAYER)
+                    bools->player_is_dead = true;
                 map->map[i][j] = E_EXPLOSION_0;
             }
         }

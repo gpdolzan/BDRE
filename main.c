@@ -95,7 +95,7 @@ int main()
                     }
 
                     // Starts TIMELORD EASTER EGG
-                    if(key[ALLEGRO_KEY_1] || input_cache.key_1 == true)
+                    if((key[ALLEGRO_KEY_1] || input_cache.key_1 == true) && game_bools.map_is_loaded == true)
                     {
                         input_cache.key_1 = false;
                         game_bools.timelord = true;
@@ -103,7 +103,7 @@ int main()
                     }
 
                     // Starts MIDAS EASTER EGG
-                    if(key[ALLEGRO_KEY_2] || input_cache.key_2 == true)
+                    if((key[ALLEGRO_KEY_2] || input_cache.key_2 == true) && game_bools.game_has_started == true)
                     {
                         input_cache.key_2 = false;
                         game_bools.midas = true;
@@ -112,7 +112,7 @@ int main()
                     }
 
                     // Starts ROXPLODER EASTER EGG
-                    if(key[ALLEGRO_KEY_3] || input_cache.key_3 == true)
+                    if((key[ALLEGRO_KEY_3] || input_cache.key_3 == true) && game_bools.map_is_loaded == true)
                     {
                         input_cache.key_3 = false;
                         game_bools.midas = true;
@@ -150,7 +150,7 @@ int main()
                             game_bools.help_is_open = false;
                         else if(game_bools.fame_is_open == true)
                             game_bools.fame_is_open = false;
-                        else if(game_bools.menu_is_open == false && game_bools. help_is_open == false && game_bools.fame_is_open == false)
+                        else if(game_bools.menu_is_open == false && game_bools. help_is_open == false && game_bools.fame_is_open == false && game_bools.map_is_loaded == true)
                         {
                             key[ALLEGRO_KEY_ESCAPE] &= KEY_RELEASED;
                             reset_input_cache();
@@ -166,7 +166,7 @@ int main()
                             game_bools.midas = false;
                             game_bools.game_win = false;
                             game_bools.level_win = false;
-                            game_bools.map_is_loaded = true;
+                            game_bools.map_is_loaded = false;
                             load_map(&game_map, &map_storer, current_level);
                             init_player(&game_map, &player);   
                         }
@@ -228,6 +228,7 @@ int main()
                         write_to_file(&sb);
                         game_bools.game_win = true;
                         game_bools.menu_is_open = true;
+                        game_bools.map_is_loaded = false;
                     }
                     else // Map rotation still has maps, load next map
                     {

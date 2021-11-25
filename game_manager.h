@@ -125,7 +125,7 @@ void add_score(GAME_SCORE* score, int flag, MY_ALLEGRO_STRUCT* my_al_struct);
 bool check_boulder_push(GAME_MAP* map, int dest_x, int dest_y);
 void push_boulder(GAME_MAP* map, int ori_x, int ori_y, int dest_x, int dest_y);
 void kill_player(GAME_MAP* map, int y, int x, MY_ALLEGRO_SAMPLES* samples);
-void kill_firefly(GAME_MAP* map, int y, int x, MY_ALLEGRO_SAMPLES* samples);
+void kill_firefly(GAME_MAP* map, int y, int x, MY_ALLEGRO_SAMPLES* samples, STATUS_BOOLS* bools);
 void check_roll_status(GAME_MAP* map, int x, int y);
 void update_roll(GAME_MAP* map, int x, int y, int object, int direction);
 void hud_timer_update(GAME_SCORE* score, STATUS_BOOLS* bools);
