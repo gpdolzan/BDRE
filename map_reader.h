@@ -1,9 +1,13 @@
+/* GRR20209948 Gabriel Pimentel Dolzan */
+
 #ifndef MAP_READER_H
 #define MAP_READER_H
 
+/* Libraries used */
 #include <stdlib.h>
 #include <stdio.h>
 
+/* Map structure */
 typedef struct GAME_MAP
 {
     int map_timer;
@@ -14,6 +18,7 @@ typedef struct GAME_MAP
 
 }GAME_MAP;
 
+/* Map-Storer structure */
 typedef struct MAP_STORER
 {
     int number_of_maps;
@@ -23,6 +28,7 @@ typedef struct MAP_STORER
 
 }MAP_STORER;
 
+/* Functions headers */
 MAP_STORER read_maps();
 GAME_MAP* game_map_alloc(int number_of_maps);
 int** map_alloc(int width, int height);

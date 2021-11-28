@@ -1,26 +1,34 @@
+/* GRR20209948 Gabriel Pimentel Dolzan */
+
 #ifndef ALLEGRO_MANAGER_H
 #define ALLEGRO_MANAGER_H
 
-#include<stdio.h>
-
+/* Libraries used */
+#include <stdio.h>
 #include "allegro_structs.h"
 #include "game_manager.h"
 #include "map_reader.h"
 #include "scoreboard.h"
 
+/* Defines to facilitate allegro functions */
+/* Display defines */
 #define BUFFER_W 640
 #define BUFFER_H 384
-
 #define DISP_SCALE 2
 #define DISP_W (BUFFER_W * DISP_SCALE)
 #define DISP_H (BUFFER_H * DISP_SCALE)
 
+/* Keys define */
 #define KEY_SEEN     1
 #define KEY_RELEASED 2
 
+/* GLOBAL VARIABLES - input keys and cache */
 unsigned char key[ALLEGRO_KEY_MAX];
-
 INPUT_CACHE input_cache;
+
+/* Functions headers below */
+
+/* Input cache */
 void reset_input_cache();
 
 /* General */

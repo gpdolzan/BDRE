@@ -1,6 +1,10 @@
+/* GRR20209948 Gabriel Pimentel Dolzan */
+
+/* Libraries used */
 #include "game_manager.h"
 #include "allegro_manager.h"
 
+/* initializes_bools */
 void initialize_bools(STATUS_BOOLS* bools)
 {
     bools->map_is_loaded = false;
@@ -19,29 +23,30 @@ void initialize_bools(STATUS_BOOLS* bools)
     bools->midas = false;
     bools->timelord = false;
     bools->roxploder = false;
-
     return;
 }
 
+/* Updates terrain */
 void terrain_update(GAME_MAP* map, STATUS_BOOLS* bools, MY_ALLEGRO_SAMPLES* samples)
 {
+    /* Iterates through map array */
     for(int i = 0; i < map->height; i++)
     {
         for(int j = 0; j < map->width; j++)
         {  
-            // Test boulder, gem and gold if they should fall or not
+            /* Test boulder, gem and gold if they should fall or not */
             if(map->map[i][j] == BOULDER || map->map[i][j] == GEM || map->map[i][j] == GOLD || map->map[i][j] == FALLING_GEM || map->map[i][j] == FALLING_BOULDER || map->map[i][j] == FALLING_GOLD)
                 update_fall(map, j, i, check_fall_status(map, j, i), bools, samples);
 
-            // Test boulder, gem and gold if they should roll or not
+            /* Test boulder, gem and gold if they should roll or not */
             if((map->map[i][j] == GEM) || (map->map[i][j] == BOULDER) || (map->map[i][j] == GOLD) || (map->map[i][j] == FALLING_GEM) || (map->map[i][j] == FALLING_BOULDER) || (map->map[i][j] == FALLING_GOLD))
                 check_roll_status(map, j, i);
 
-            // Test firefly and if its direction should change or not
+            /* Test firefly and if its direction should change or not */
             if((map->map[i][j] == FIREFLY_UP) || (map->map[i][j] == FIREFLY_LEFT) || (map->map[i][j] == FIREFLY_DOWN) || (map->map[i][j] == FIREFLY_RIGHT))
                 update_firefly(map, j, i, check_firefly_status(map, j, i), bools, samples);
 
-            //Transform firefly explosion into gem
+            /* ransform firefly explosion into gem */
             if(map->map[i][j] == P_EXPLOSION_5)
                 map->map[i][j] = AIR;
             else if(map->map[i][j] == E_EXPLOSION_5)
@@ -51,17 +56,18 @@ void terrain_update(GAME_MAP* map, STATUS_BOOLS* bools, MY_ALLEGRO_SAMPLES* samp
     return;
 }
 
+/* Updates firefly position based on direction */
 void update_firefly(GAME_MAP* map, int x, int y, int flag, STATUS_BOOLS* bools, MY_ALLEGRO_SAMPLES* samples)
 {
-    // Firefly going up
+    /* Firefly going up */
     if((map->map[y][x] == FIREFLY_UP) && flag >= 1)
     {
-        if(flag == 1)
+        if(flag == 1) /* Moves to desired direction */
         {
             map->map[y][x] = AIR;
             map->map[y - 1][x] = FIREFLY_MOVED_UP;
         }
-        else if(flag == 2)
+        else if(flag == 2) /* Moves to desired direction, kills player */
         {
             bools->player_is_dead = true;
             kill_player(map, y - 1, x, samples);
@@ -69,15 +75,15 @@ void update_firefly(GAME_MAP* map, int x, int y, int flag, STATUS_BOOLS* bools, 
         return;
     }
 
-    // Firefly going left
+    /* Firefly going left */
     if((map->map[y][x] == FIREFLY_LEFT) && flag >= 1)
     {
-        if(flag == 1)
+        if(flag == 1) /* Moves to desired direction */
         {
             map->map[y][x] = AIR;
             map->map[y][x - 1] = FIREFLY_MOVED_LEFT;
         }
-        else if(flag == 2)
+        else if(flag == 2) /* Moves to desired direction, kills player */
         {
             bools->player_is_dead = true;
             kill_player(map, y, x - 1, samples);
@@ -85,15 +91,15 @@ void update_firefly(GAME_MAP* map, int x, int y, int flag, STATUS_BOOLS* bools, 
         return;
     }
 
-    // Firefly going down
+    /* Firefly going down */
     if((map->map[y][x] == FIREFLY_DOWN) && flag >= 1)
     {
-        if(flag == 1)
+        if(flag == 1) /* Moves to desired direction */
         {
             map->map[y][x] = AIR;
             map->map[y + 1][x] = FIREFLY_MOVED_DOWN;
         }
-        else if(flag == 2)
+        else if(flag == 2) /* Moves to desired direction, kills player */
         {
             bools->player_is_dead = true;
             kill_player(map, y + 1, x, samples);
@@ -101,15 +107,15 @@ void update_firefly(GAME_MAP* map, int x, int y, int flag, STATUS_BOOLS* bools, 
         return;
     }
 
-    // Firefly going right
+    /* Firefly going right */
     if((map->map[y][x] == FIREFLY_RIGHT) && flag >= 1)
     {
-        if(flag == 1)
+        if(flag == 1) /* Moves to desired direction */
         {
             map->map[y][x] = AIR;
             map->map[y][x + 1] = FIREFLY_MOVED_RIGHT;
         }
-        else if(flag == 2)
+        else if(flag == 2) /* Moves to desired direction, kills player */
         {
             bools->player_is_dead = true;
             kill_player(map, y, x + 1, samples);
@@ -120,11 +126,11 @@ void update_firefly(GAME_MAP* map, int x, int y, int flag, STATUS_BOOLS* bools, 
 
 int check_firefly_status(GAME_MAP* map, int x, int y)
 {
-
-    // Based on the direction, returns how it should compute
-    // if returns 0: do nothing
-    // if returns 1: move to the desired direction
-    // if returns 2: move to the desired direction, killing the player
+    /* Checks if firefly can move in a certain direction */
+    /* Based on the direction and objects it interacts with, returns what the program should do */
+    /* if returns 0: do nothing */
+    /* if returns 1: move to the desired direction */
+    /* if returns 2: move to the desired direction, killing the player */
 
     if(map->map[y][x] == FIREFLY_UP)
     {
@@ -165,7 +171,7 @@ int check_firefly_status(GAME_MAP* map, int x, int y)
     return 0;
 }
 
-// Remove all rocks from game map
+/* Remove all rocks from game map */
 void remove_rocks(GAME_MAP* map)
 {
     for(int i = 0; i < map->height; i++)
@@ -180,7 +186,7 @@ void remove_rocks(GAME_MAP* map)
     }
 }
 
-// Transforms all rocks to gold
+/* Transforms all rocks to gold */
 void goldify_rocks(GAME_MAP* map)
 {
     for(int i = 0; i < map->height; i++)
@@ -197,37 +203,36 @@ void goldify_rocks(GAME_MAP* map)
     }
 }
 
-// Checks firefly movement up
+/* Checks firefly movement up */
 void check_ff_move_up(GAME_MAP* map, int j, int i)
 {
-    // Check firefly up
     if(map->map[i][j] == FIREFLY_MOVED_UP)
     {
-        // Can move left
+        /* Can move left */
         if(map->map[i][j - 1] == AIR || map->map[i][j - 1] == PLAYER)
         {
             map->map[i][j] = FIREFLY_LEFT;
             return;
         }
 
-        // Can't move left
+        /* Can't move left */
         else
         {   
-            // Can move up
+            /* Can move up */
             if((map->map[i - 1][j] == AIR) || (map->map[i - 1][j] == PLAYER))
             {
                 map->map[i][j] = FIREFLY_UP;
                 return;
             }
 
-            // Can move right
+            /* Can move right */
             if((map->map[i][j + 1] == AIR) || (map->map[i][j + 1] == PLAYER))
             {
                 map->map[i][j] = FIREFLY_RIGHT;
                 return;
             }
 
-            // Can move down
+            /* Can move down */
             if((map->map[i + 1][j] == AIR) || (map->map[i + 1][j] == PLAYER))
             {
                 map->map[i][j] = FIREFLY_DOWN;
@@ -237,37 +242,36 @@ void check_ff_move_up(GAME_MAP* map, int j, int i)
     }
 }
 
-// Checks firefly movement left
+/* Checks firefly movement left */
 void check_ff_move_left(GAME_MAP* map, int j, int i)
 {
-    // Check firefly left
     if(map->map[i][j] == FIREFLY_MOVED_LEFT)
     {
-        // Can move down
+        /* Can move down */
         if(map->map[i + 1][j] == AIR || map->map[i + 1][j] == PLAYER)
         {
             map->map[i][j] = FIREFLY_DOWN;
             return;
         }
 
-        // Can't move down
+        /* Can't move down */
         else
         {   
-            // Can move left
+            /* Can move left */
             if((map->map[i][j - 1] == AIR) || (map->map[i][j - 1] == PLAYER))
             {
                 map->map[i][j] = FIREFLY_LEFT;
                 return;
             }
 
-            // Can move up
+            /* Can move up */
             if((map->map[i - 1][j] == AIR) || (map->map[i - 1][j] == PLAYER))
             {
                 map->map[i][j] = FIREFLY_UP;
                 return;
             }
 
-            // Can move right
+            /* Can move right */
             if((map->map[i][j + 1] == AIR) || (map->map[i][j + 1] == PLAYER))
             {
                 map->map[i][j] = FIREFLY_RIGHT;
@@ -277,37 +281,36 @@ void check_ff_move_left(GAME_MAP* map, int j, int i)
     }
 }
 
-// Checks firefly movement down
+/* Checks firefly movement down */
 void check_ff_move_down(GAME_MAP* map, int j, int i)
 {
-    // Check firefly down
     if (map->map[i][j] == FIREFLY_MOVED_DOWN)
     {
-        // Can move right
+        /* Can move right */
         if (map->map[i][j + 1] == AIR || map->map[i][j + 1] == PLAYER)
         {
             map->map[i][j] = FIREFLY_RIGHT;
             return;
         }
 
-        // Can't move right
+        /* Can't move right */
         else
         {
-            // Can move down
+            /* Can move down */
             if ((map->map[i + 1][j] == AIR) || (map->map[i + 1][j] == PLAYER))
             {
                 map->map[i][j] = FIREFLY_DOWN;
                 return;
             }
 
-            // Can move left
+            /* Can move left */
             if ((map->map[i][j - 1] == AIR) || (map->map[i][j - 1] == PLAYER))
             {
                 map->map[i][j] = FIREFLY_LEFT;
                 return;
             }
 
-            // Can move up
+            /* Can move up */
             if ((map->map[i - 1][j] == AIR) || (map->map[i - 1][j] == PLAYER))
             {
                 map->map[i][j] = FIREFLY_UP;
@@ -317,37 +320,36 @@ void check_ff_move_down(GAME_MAP* map, int j, int i)
     }
 }
 
-// Checks firefly movement right
+/* Checks firefly movement right */
 void check_ff_move_right(GAME_MAP* map, int j, int i)
 {
-    // Check firefly right
     if (map->map[i][j] == FIREFLY_MOVED_RIGHT)
     {
-        // Can move up
+        /* Can move up */
         if (map->map[i - 1][j] == AIR || map->map[i - 1][j] == PLAYER)
         {
             map->map[i][j] = FIREFLY_UP;
             return;
         }
 
-        // Can't move up
+        /* Can't move up */
         else
         {
-            // Can move right
+            /* Can move right */
             if ((map->map[i][j + 1] == AIR) || (map->map[i][j + 1] == PLAYER))
             {
                 map->map[i][j] = FIREFLY_RIGHT;
                 return;
             }
 
-            // Can move down
+            /* Can move down */
             if ((map->map[i + 1][j] == AIR) || (map->map[i + 1][j] == PLAYER))
             {
                 map->map[i][j] = FIREFLY_DOWN;
                 return;
             }
 
-            // Can move left
+            /* Can move left */
             if ((map->map[i][j - 1] == AIR) || (map->map[i][j - 1] == PLAYER))
             {
                 map->map[i][j] = FIREFLY_LEFT;
@@ -357,6 +359,7 @@ void check_ff_move_right(GAME_MAP* map, int j, int i)
     }
 }
 
+/* Check if a certain "game cell" is a firefly */
 bool is_firefly(GAME_MAP* map, int x, int y)
 {
     if(map->map[y][x] == FIREFLY_UP || map->map[y][x] == FIREFLY_DOWN || map->map[y][x] == FIREFLY_RIGHT || map->map[y][x] == FIREFLY_LEFT 
@@ -365,7 +368,7 @@ bool is_firefly(GAME_MAP* map, int x, int y)
     return false;
 }
 
-// Resets movement of all movable objects, so that they can be moved again
+/* Resets movement of all movable objects, so that they can be moved again */
 void reset_movement(GAME_MAP* map)
 {
     for(int i = 0; i < map->height; i++)
@@ -374,7 +377,7 @@ void reset_movement(GAME_MAP* map)
         {
             switch(map->map[i][j])
             {
-                // Checks Boulders, Gems and Gold
+                /* Checks Boulders, Gems and Gold */
                 case BOULDER_MOVED:
                     if(map->map[i + 1][j] == AIR || map->map[i + 1][j] == PLAYER || is_firefly(map, j, i + 1))
                         map->map[i][j] = FALLING_BOULDER;
@@ -396,7 +399,7 @@ void reset_movement(GAME_MAP* map)
                         map->map[i][j] = GOLD;
                     break;
 
-                //Checks firefly movement
+                /* Checks firefly movement */
                 case FIREFLY_MOVED_UP: check_ff_move_up(map, j, i); break;
                 case FIREFLY_MOVED_LEFT: check_ff_move_left(map, j, i); break;
                 case FIREFLY_MOVED_DOWN: check_ff_move_down(map, j, i); break;
@@ -408,71 +411,70 @@ void reset_movement(GAME_MAP* map)
 
 int check_fall_status(GAME_MAP* map, int x, int y)
 {
-    // returning 0 means the object can fall, but is not falling [BOULDER]
-    // returning 1 means the object can fall and is falling [FALLING_BOULDER]
-    // returning 2 means the object can fall and is falling right above the player's / firefly's character [BOULDER_MOVED]
-    // returning 3 means the object can fall, but is not falling [GEM]
-    // returning 4 means the object can fall and is falling [FALLING_GEM]
-    // returning 5 means the object can fall and is falling right above the player's / firefly's character [GEM_MOVED]
-    // returning 6 means the object can fall, but is not falling [GOLD]
-    // returning 7 means the object can fall and is falling [FALLING_GOLD]
-    // returning 8 means the object can fall and is falling right above the player's / firefly's character [GOLD_MOVED]
+    /* returning 0 means the object can fall, but is not falling [BOULDER]                                                 */
+    /* returning 1 means the object can fall and is falling [FALLING_BOULDER]                                              */
+    /* returning 2 means the object can fall and is falling right above the player's / firefly's character [BOULDER_MOVED] */
+    /* returning 3 means the object can fall, but is not falling [GEM]                                                     */
+    /* returning 4 means the object can fall and is falling [FALLING_GEM]                                                  */
+    /* returning 5 means the object can fall and is falling right above the player's / firefly's character [GEM_MOVED]     */
+    /* returning 6 means the object can fall, but is not falling [GOLD]                                                    */
+    /* returning 7 means the object can fall and is falling [FALLING_GOLD]                                                 */
+    /* returning 8 means the object can fall and is falling right above the player's / firefly's character [GOLD_MOVED]    */
 
     if(map->map[y][x] == BOULDER || map->map[y][x] == FALLING_BOULDER)
     {
         if(((map->map[y + 1][x] == PLAYER) || is_firefly(map, x, y + 1)) && map->map[y][x] == FALLING_BOULDER)
-            return 2; // boulder is falling (will kill player or firefly)
+            return 2; /* boulder is falling (will kill player or firefly) */
         else if(map->map[y + 1][x] == AIR)
-            return 1; // boulder is falling
+            return 1; /* boulder is falling */
         else
-            return 0; // boulder is not moving
+            return 0; /* boulder is not moving */
     }
 
     if(map->map[y][x] == GEM || map->map[y][x] == FALLING_GEM)
     {
         if(((map->map[y + 1][x] == PLAYER) || is_firefly(map, x, y + 1)) && map->map[y][x] == FALLING_GEM)
-            return 5; // gem is falling (will kill player)
+            return 5; /* gem is falling (will kill player) */
         else if(map->map[y + 1][x] == AIR)
-            return 4; // gem is falling
+            return 4; /* gem is falling */
         else
-            return 3; // gem is not moving
+            return 3; /* gem is not moving */
     }
 
     if(map->map[y][x] == GOLD || map->map[y][x] == FALLING_GOLD)
     {
         if(((map->map[y + 1][x] == PLAYER) || is_firefly(map, x, y + 1)) && map->map[y][x] == FALLING_GOLD)
-            return 8; // gold is falling (will kill player)
+            return 8; /* gold is falling (will kill player) */
         else if(map->map[y + 1][x] == AIR)
-            return 7; // gold is falling
+            return 7; /* gold is falling */
         else
-            return 6; // gold is not moving
+            return 6; /* gold is not moving */
     }
-
     return 0;
 }
 
 void update_fall(GAME_MAP* map, int x, int y, int fall_status, STATUS_BOOLS* bools, MY_ALLEGRO_SAMPLES* samples)
 {
 
-    // returning 0 means the object can fall, but is not falling [BOULDER]
-    // returning 1 means the object can fall and is falling [FALLING_BOULDER]
-    // returning 2 means the object can fall and is falling right above the player's character [FALLING_BOULDER]
-    // returning 3 means the object can fall, but is not falling [GEM]
-    // returning 4 means the object can fall and is falling [FALLING_GEM]
-    // returning 5 means the object can fall and is falling right above the player's character [FALLING_GEM]
-    // returning 6 means the object can fall, but is not falling [GOLD]
-    // returning 7 means the object can fall and is falling [FALLING_GOLD]
-    // returning 8 means the object can fall and is falling right above the player's character [GOLD_MOVED]
+    /* returning 0 means the object can fall, but is not falling [BOULDER]                                       */
+    /* returning 1 means the object can fall and is falling [FALLING_BOULDER]                                    */
+    /* returning 2 means the object can fall and is falling right above the player's character [FALLING_BOULDER] */
+    /* returning 3 means the object can fall, but is not falling [GEM]                                           */
+    /* returning 4 means the object can fall and is falling [FALLING_GEM]                                        */
+    /* returning 5 means the object can fall and is falling right above the player's character [FALLING_GEM]     */
+    /* returning 6 means the object can fall, but is not falling [GOLD]                                          */
+    /* returning 7 means the object can fall and is falling [FALLING_GOLD]                                       */
+    /* returning 8 means the object can fall and is falling right above the player's character [GOLD_MOVED]      */
 
-    if(fall_status == 0)
+    if(fall_status == 0) /* Object is not falling */
         return;
-    else if(fall_status == 1)
+    else if(fall_status == 1) /* Object is falling */
     {
         map->map[y][x] = AIR;
         map->map[y + 1][x] = BOULDER_MOVED;
         return;
     }
-    else if(fall_status == 2)
+    else if(fall_status == 2) /* Object is falling and will kill player/firefly */
     {
         if(map->map[y + 1][x] != PLAYER)
             kill_firefly(map, y + 1, x, samples, bools);
@@ -483,15 +485,15 @@ void update_fall(GAME_MAP* map, int x, int y, int fall_status, STATUS_BOOLS* boo
         }
         return;
     }
-    else if(fall_status == 3)
+    else if(fall_status == 3) /* Object is not falling */
         return;
-    else if(fall_status == 4)
+    else if(fall_status == 4) /* Object is falling */
     {
         map->map[y][x] = AIR;
         map->map[y + 1][x] = GEM_MOVED;
         return;
     }
-    else if(fall_status == 5)
+    else if(fall_status == 5) /* Object is falling and will kill player/firefly */
     {
         if(map->map[y + 1][x] != PLAYER)
             kill_firefly(map, y + 1, x, samples, bools);
@@ -502,15 +504,15 @@ void update_fall(GAME_MAP* map, int x, int y, int fall_status, STATUS_BOOLS* boo
         }
         return;
     }
-    else if(fall_status == 6)
+    else if(fall_status == 6) /* Object is not falling */
         return;
-    else if(fall_status == 7)
+    else if(fall_status == 7) /* Object is falling */
     {
         map->map[y][x] = AIR;
         map->map[y + 1][x] = GOLD_MOVED;
         return;
     }
-    else if(fall_status == 8)
+    else if(fall_status == 8) /* Object is falling and will kill player/firefly */
     {
         if(map->map[y + 1][x] != PLAYER)
             kill_firefly(map, y + 1, x, samples, bools);
@@ -523,7 +525,7 @@ void update_fall(GAME_MAP* map, int x, int y, int fall_status, STATUS_BOOLS* boo
     }
 }
 
-// Initialize player struct based on player's coordinates
+/* Initialize player struct based on player's coordinates */
 void init_player(GAME_MAP* map, COORDINATES* player)
 {
     for(int i = 0; i < map->height; i++)
@@ -539,7 +541,7 @@ void init_player(GAME_MAP* map, COORDINATES* player)
     }
 }
 
-// Initialize hatch based on hatch's coordinates
+/* Initialize hatch based on hatch's coordinates */
 void init_hatch(GAME_MAP* map, COORDINATES* hatch)
 {
     for(int i = 0; i < map->height; i++)
@@ -555,7 +557,7 @@ void init_hatch(GAME_MAP* map, COORDINATES* hatch)
     }
 }
 
-// Open hatch
+/* Open hatch */
 void open_hatch(GAME_MAP* map, COORDINATES* hatch)
 {
     int found = 0;
@@ -578,23 +580,24 @@ void open_hatch(GAME_MAP* map, COORDINATES* hatch)
         return;
 }
 
-// Update explosion frames
+/* Update explosion frames */
 void update_frames(GAME_MAP* map)
 {
+    /* Iterates through game map */
     for(int i = 0; i < map->height; i++)
     {
         for(int j = 0; j < map->width; j++)
         {
             switch(map->map[i][j])
             {
-                // Player Death
+                /* Player Death */
                 case P_EXPLOSION_0: map->map[i][j]++; break;
                 case P_EXPLOSION_1: map->map[i][j]++; break;
                 case P_EXPLOSION_2: map->map[i][j]++; break;
                 case P_EXPLOSION_3: map->map[i][j]++; break;
                 case P_EXPLOSION_4: map->map[i][j]++; break;
 
-                // Enemy Death
+                /* Enemy Death */
                 case E_EXPLOSION_0: map->map[i][j]++; break;
                 case E_EXPLOSION_1: map->map[i][j]++; break;
                 case E_EXPLOSION_2: map->map[i][j]++; break;
@@ -605,7 +608,7 @@ void update_frames(GAME_MAP* map)
     }
 }
 
-// Initializes score
+/* Initializes score structure */
 void init_score(GAME_SCORE* score, MAP_STORER* ms)
 {
     score->gems_collected = 0;
@@ -614,7 +617,7 @@ void init_score(GAME_SCORE* score, MAP_STORER* ms)
     score->game_score = 0;
 }
 
-// Restarts player-related collectibles and timer [Score is handled separated from here]
+/* Restarts player-related collectibles and timer [Score is handled separated from here] */
 void restart_score(GAME_SCORE* score, int current_level, MAP_STORER* ms)
 {
     score->gems_collected = 0;
@@ -622,68 +625,75 @@ void restart_score(GAME_SCORE* score, int current_level, MAP_STORER* ms)
     score->timer = ms->game_map_array[current_level].map_timer;
 }
 
-// Updates the player based on what movement it wants to perform
+/* Updates the player based on what movement it wants to perform */
 void player_update(GAME_MAP* map, COORDINATES* player, GAME_SCORE* score, STATUS_BOOLS* bools, MY_ALLEGRO_STRUCT* my_al_struct)
 {
     if(key[ALLEGRO_KEY_LEFT] || input_cache.key_left)
     {
         check_move(map, player, -1, 0, score, bools, my_al_struct);
-        input_cache.key_left = false; // resets cache
+        input_cache.key_left = false; /* resets cache */
     }
     if(key[ALLEGRO_KEY_RIGHT] || input_cache.key_right)
     {
         check_move(map, player, 1, 0, score, bools, my_al_struct);
-        input_cache.key_right = false; // resets cache
+        input_cache.key_right = false; /* resets cache */
     }
     if(key[ALLEGRO_KEY_UP] || input_cache.key_up)
     {
         check_move(map, player, 0, -1, score, bools, my_al_struct);
-        input_cache.key_up = false; // resets cache
+        input_cache.key_up = false; /* resets cache */
     }
     if(key[ALLEGRO_KEY_DOWN] || input_cache.key_down)
     {
         check_move(map, player, 0, 1, score, bools, my_al_struct);
-        input_cache.key_down = false; // resets cache
+        input_cache.key_down = false; /* resets cache */
     }
 }
 
-// Check if desired move is able to be completed, if so, executes move else, it returns
+/* Check if desired move is able to be completed, if so, executes move else, it returns */
 void check_move(GAME_MAP* map, COORDINATES* player, int x, int y, GAME_SCORE* score, STATUS_BOOLS* bools, MY_ALLEGRO_STRUCT* my_al_struct)
 {
     if(map->map[player->y + y][player->x + x] == AIR)
     {
+        /* Player moves to position */
         update_move(map, player, x, y);
         return;
     }
     if(map->map[player->y + y][player->x + x] == DIRT)
     {
+        /* Player moves to position */
         update_move(map, player, x, y);
         add_score(score, DIRT, my_al_struct);
         return;
     }
     if(map->map[player->y + y][player->x + x] == GEM)
     {
+        /* Player collects gem */
         update_move(map, player, x, y);
-        score->gems_collected++;
         add_score(score, GEM, my_al_struct);
+        score->gems_collected++;
         return;
     }
     if(map->map[player->y + y][player->x + x] == CLOCK)
     {
+        /* Player collects clock */
         update_move(map, player, x, y);
         add_score(score, CLOCK, my_al_struct);
         return;
     }
     if(map->map[player->y + y][player->x + x] == GOLD)
     {
+        /* Player collects gold */
         update_move(map, player, x, y);
         add_score(score, GOLD, my_al_struct);
         return;
     }
     if(map->map[player->y][player->x + x] == BOULDER)
     {
+        /* Checks if coulder can be pushed */
         if(check_boulder_push(map, player->y, player->x + x + x))
         {
+            /* Pushes boulder and update player position */
             push_boulder(map, player->y, player->x + x, player->y, player->x + x + x);
             update_move(map, player, x, y);
         }
@@ -691,6 +701,7 @@ void check_move(GAME_MAP* map, COORDINATES* player, int x, int y, GAME_SCORE* sc
     }
     if(map->map[player->y + y][player->x + x] == OPEN_HATCH)
     {
+        /* Player moved to open hatch, ending the level */
         bools->level_win = true;
         add_score(score, OPEN_HATCH, my_al_struct);
         return;
@@ -698,7 +709,7 @@ void check_move(GAME_MAP* map, COORDINATES* player, int x, int y, GAME_SCORE* sc
     return;
 }
 
-// Actually finishes player movement, by moving the player to a certain position in the game map
+/* Finishes player movement action, by moving the player to a certain position in the game map */
 void update_move(GAME_MAP* map, COORDINATES* player, int dest_x, int dest_y)
 {
     map->map[player->y][player->x] = AIR;
@@ -707,7 +718,7 @@ void update_move(GAME_MAP* map, COORDINATES* player, int dest_x, int dest_y)
     player->x = player->x + dest_x;
 }
 
-// Returns true if boulder can be pushed
+/* Returns true if boulder can be pushed */
 bool check_boulder_push(GAME_MAP* map, int dest_x, int dest_y)
 {
     if(map->map[dest_x][dest_y] == AIR)
@@ -715,14 +726,14 @@ bool check_boulder_push(GAME_MAP* map, int dest_x, int dest_y)
     return false;
 }
 
-// Pushes boulder to the side
+/* Pushes boulder to a certain side */
 void push_boulder(GAME_MAP* map, int ori_y, int ori_x, int dest_y, int dest_x)
 {
     map->map[ori_y][ori_x] = AIR;
     map->map[dest_y][dest_x] = BOULDER_MOVED;
 }
 
-// Add score to player based on what was collected
+/* Add score to player based on what was collected */
 void add_score(GAME_SCORE* score, int flag, MY_ALLEGRO_STRUCT* my_al_struct)
 {
     if(flag == GEM)
@@ -746,7 +757,7 @@ void add_score(GAME_SCORE* score, int flag, MY_ALLEGRO_STRUCT* my_al_struct)
     }
 }
 
-// Kills player, starts player explosion animation
+/* Kills player, starts player explosion animation */
 void kill_player(GAME_MAP* map, int y, int x, MY_ALLEGRO_SAMPLES* samples)
 {
     play_explosion(samples);
@@ -763,7 +774,7 @@ void kill_player(GAME_MAP* map, int y, int x, MY_ALLEGRO_SAMPLES* samples)
     return;
 }
 
-// Kills firefly, starts enemy explosion animation
+/* Kills firefly, starts enemy explosion animation */
 void kill_firefly(GAME_MAP* map, int y, int x, MY_ALLEGRO_SAMPLES* samples, STATUS_BOOLS* bools)
 {
     play_explosion(samples);
@@ -782,31 +793,31 @@ void kill_firefly(GAME_MAP* map, int y, int x, MY_ALLEGRO_SAMPLES* samples, STAT
     return;
 }
 
-// Check if boulder/gem/gold can roll, if it can, update it in the game map
+/* Check if boulder/gem/gold can roll, if it can, update it in the game map */
 void check_roll_status(GAME_MAP* map, int x, int y)
 {
     int object = -1;
 
     if(map->map[y][x] == BOULDER || map->map[y][x] == FALLING_BOULDER)
-        object = 0;
+        object = 0; /* BOULDER */
     else if(map->map[y][x] == GEM || map->map[y][x] == FALLING_GEM)
-        object = 1;
+        object = 1; /* GEM */
     else if(map->map[y][x] == GOLD || map->map[y][x] == FALLING_GOLD)
-        object = 2;
+        object = 2; /* GOLD */
 
     if(map->map[y + 1][x] == BOULDER || map->map[y + 1][x] == GEM || map->map[y + 1][x] == GOLD || map->map[y + 1][x] == FALLING_BOULDER || map->map[y + 1][x] == FALLING_GEM || map->map[y + 1][x] == FALLING_GOLD)
     {
-        //Check right-side
+        /* Check right-side roll */
         if(map->map[y][x + 1] == AIR && map->map[y + 1][x + 1] == AIR)
             update_roll(map, x, y, object, 1);
-        //Check left-side
+        /* Check left-side roll */
         else if (map->map[y][x - 1] == AIR && map->map[y + 1][x - 1] == AIR)
             update_roll(map, x, y, object, -1);
     }
     return;
 }
 
-// Actually updates boulder roll in game map
+/* Updates boulder roll in game map */
 void update_roll(GAME_MAP* map, int x, int y, int object, int direction)
 {
     map->map[y][x] = AIR;
@@ -819,7 +830,7 @@ void update_roll(GAME_MAP* map, int x, int y, int object, int direction)
     return;
 }
 
-// Updates timer hud and checks if time is up
+/* Updates timer hud and checks if time is up */
 void hud_timer_update(GAME_SCORE* score, STATUS_BOOLS* bools)
 {
     if(score->timer >= 1)
@@ -829,6 +840,7 @@ void hud_timer_update(GAME_SCORE* score, STATUS_BOOLS* bools)
         bools->is_time_up = true;
 }
 
+/* Start level for the first time */
 void start_level(MAP_STORER* ms, GAME_MAP* map, STATUS_BOOLS* bools, MY_ALLEGRO_SAMPLES* samples, int current_level)
 {
     key[ALLEGRO_KEY_P] &= KEY_RELEASED;
@@ -848,6 +860,7 @@ void start_level(MAP_STORER* ms, GAME_MAP* map, STATUS_BOOLS* bools, MY_ALLEGRO_
     play_click(samples);
 }
 
+/* Open fame menu */
 void open_fame_menu(SCOREBOARD* sb, STATUS_BOOLS* bools, MY_ALLEGRO_SAMPLES* samples)
 {
     fetch_sb(sb);
@@ -860,6 +873,7 @@ void open_fame_menu(SCOREBOARD* sb, STATUS_BOOLS* bools, MY_ALLEGRO_SAMPLES* sam
     }
 }
 
+/* Open help menu */
 void open_help_menu(STATUS_BOOLS* bools, MY_ALLEGRO_SAMPLES* samples)
 {
     key[ALLEGRO_KEY_H] &= KEY_RELEASED;

@@ -1,10 +1,14 @@
+/* GRR20209948 Gabriel Pimentel Dolzan */
+
 #ifndef SCOREBOARD_H
 #define SCOREBOARD_H
 
+/* Libraries used */
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 
+/* Scoreboard structure */
 typedef struct SCOREBOARD
 {
     int sb_size;
