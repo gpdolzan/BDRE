@@ -68,10 +68,7 @@ bool check_file_existence()
     FILE* f_score;
     f_score = fopen("./resources/sb.info", "r");
     if(f_score == NULL)
-    {
-        fclose(f_score);
         return false; /* File doesn't exist */
-    }
     fclose(f_score);
     return true; /* File exists */
 }
