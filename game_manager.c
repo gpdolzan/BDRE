@@ -187,10 +187,12 @@ void goldify_rocks(GAME_MAP* map)
     {
         for(int j = 0; j < map->width; j++)
         {  
-            if (map->map[i][j] == BOULDER || map->map[i][j] == FALLING_BOULDER || map->map[i][j] == BOULDER_MOVED)
-            {
+            if (map->map[i][j] == BOULDER)
                 map->map[i][j] = GOLD;
-            }
+            else if(map->map[i][j] == FALLING_BOULDER)
+                map->map[i][j] = FALLING_GOLD;
+            else if(map->map[i][j] == BOULDER_MOVED)
+                map->map[i][j] = GOLD_MOVED;
         }
     }
 }
